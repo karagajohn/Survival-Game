@@ -28,7 +28,7 @@ public class BushSpawner : MonoBehaviour
 
     [Header("Resources")]
     [Range(0f, 1f)]
-    public float foodBushChance = 0.35f;
+    public float foodBushChance = 1f;
 
     public int minimumFoodDrop = 1;
     public int maximumFoodDrop = 3;
@@ -163,27 +163,31 @@ public class BushSpawner : MonoBehaviour
 
         bush.transform.localScale *= randomScale;
 
-        if (Random.value <= foodBushChance)
+        ResourceNode node = bush.GetComponent<ResourceNode>();
+
+        if (node == null)
         {
-            ResourceNode node =
-                bush.GetComponent<ResourceNode>();
+            node = bush.AddComponent<ResourceNode>();
+        }
 
-            if (node == null)
-            {
-                node = bush.AddComponent<ResourceNode>();
-            }
+        node.Initialize(
+            ResourceKind.Food,
+            1,
+            Random.Range(
+                minimumFoodDrop,
+                maximumFoodDrop + 1
+            )
+        );
 
-            node.Initialize(
-                ResourceKind.Food,
-                1,
-                Random.Range(
-                    minimumFoodDrop,
-                    maximumFoodDrop + 1
-                )
-            );
+        BushInteraction interaction =
+            bush.GetComponent<BushInteraction>();
+
+        if (interaction == null)
+        {
+            bush.AddComponent<BushInteraction>();
         }
     }
-
+    
     private void ClearExistingBushes()
     {
         for (int i = bushesParent.childCount - 1; i >= 0; i--)

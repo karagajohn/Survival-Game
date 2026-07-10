@@ -20,10 +20,37 @@ public class PlayerInteraction : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0) && Time.time >= nextHitTime)
+        if (Input.GetMouseButtonDown(0))
         {
-            nextHitTime = Time.time + hitCooldown;
             TryHit();
+        }
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            TryInteract();
+        }
+    }
+
+    private void TryInteract()
+    {
+        Ray ray = playerCamera.ViewportPointToRay(
+            new Vector3(0.5f,0.5f)
+        );
+
+        if (!Physics.Raycast(
+            ray,
+            out RaycastHit hit,
+            range))
+        {
+            return;
+        }
+
+        IInteractable interactable =
+            hit.collider.GetComponentInParent<IInteractable>();
+
+        if (interactable != null)
+        {
+            interactable.Interact();
         }
     }
 
@@ -63,4 +90,5 @@ public class PlayerInteraction : MonoBehaviour
         attackDamage = Mathf.Max(attackDamage, 5);
         Debug.Log("Equipped Club!");
     }
+    
 }
