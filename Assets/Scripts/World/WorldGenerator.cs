@@ -3,8 +3,12 @@ using UnityEngine;
 public class WorldGenerator : MonoBehaviour
 {
     public WorldSettings settings;
+    public TreeSpawner treeSpawner;
     public Transform terrainParent;
+
     public Material terrainMaterial;
+
+    public WaterGenerator waterGenerator;
 
     private void Start()
     {
@@ -15,6 +19,16 @@ public class WorldGenerator : MonoBehaviour
         }
 
         GenerateChunks();
+
+        if (waterGenerator != null)
+        {
+            waterGenerator.GenerateWater();
+        }
+        
+        if (treeSpawner != null)
+        {
+            treeSpawner.GenerateTrees();
+        }
     }
 
     private void GenerateChunks()
