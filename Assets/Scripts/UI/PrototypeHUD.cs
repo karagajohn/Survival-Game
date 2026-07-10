@@ -35,6 +35,8 @@ public class PrototypeHUD : MonoBehaviour
             GUILayout.Label($"Wood: {inventory.wood}");
             GUILayout.Label($"Stone: {inventory.stone}");
             GUILayout.Label($"Food: {inventory.food}");
+            GUILayout.Label($"Iron Ore: {inventory.ironOre}");
+            GUILayout.Label($"Gold Ore: {inventory.goldOre}");
         }
 
         GUILayout.Space(10);

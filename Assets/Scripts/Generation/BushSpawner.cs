@@ -1,53 +1,60 @@
 using UnityEngine;
 
-public class TreeSpawner : MonoBehaviour
+public class BushSpawner : MonoBehaviour
 {
     [Header("References")]
     public WorldSettings settings;
-    public GameObject[] treePrefabs;
-    public Transform treesParent;
+    public GameObject[] bushPrefabs;
+    public Transform bushesParent;
 
     [Header("Spawn Settings")]
     [Min(0)]
-    public int spawnAttempts = 1200;
+    public int spawnAttempts = 900;
 
     [Range(0f, 1f)]
-    public float grassSpawnChance = 0.12f;
+    public float grassSpawnChance = 0.18f;
 
     [Range(0f, 1f)]
-    public float forestSpawnChance = 0.35f;
+    public float forestSpawnChance = 0.28f;
 
     [Header("Placement")]
     public float raycastHeight = 100f;
 
     [Range(0f, 60f)]
-    public float maximumSlope = 28f;
+    public float maximumSlope = 25f;
 
-    public float minimumScale = 0.8f;
-    public float maximumScale = 1.25f;
+    public float minimumScale = 0.7f;
+    public float maximumScale = 1.3f;
 
-    public void GenerateTrees()
+    [Header("Resources")]
+    [Range(0f, 1f)]
+    public float foodBushChance = 0.35f;
+
+    public int minimumFoodDrop = 1;
+    public int maximumFoodDrop = 3;
+
+    public void GenerateBushes()
     {
         if (settings == null)
         {
-            Debug.LogError("TreeSpawner: WorldSettings is missing.");
+            Debug.LogError("BushSpawner: WorldSettings is missing.");
             return;
         }
 
-        if (treePrefabs == null || treePrefabs.Length == 0)
+        if (bushPrefabs == null || bushPrefabs.Length == 0)
         {
-            Debug.LogError("TreeSpawner: No tree prefabs assigned.");
+            Debug.LogError("BushSpawner: No bush prefabs assigned.");
             return;
         }
 
-        if (treesParent == null)
+        if (bushesParent == null)
         {
-            treesParent = transform;
+            bushesParent = transform;
         }
 
-        ClearExistingTrees();
+        ClearExistingBushes();
 
-        Random.InitState(settings.seed + 10000);
+        Random.InitState(settings.seed + 30000);
 
         float worldWidth =
             settings.chunkSize *
@@ -59,7 +66,7 @@ public class TreeSpawner : MonoBehaviour
             settings.chunksZ *
             settings.vertexSpacing;
 
-        int spawnedTrees = 0;
+        int spawnedBushes = 0;
 
         for (int i = 0; i < spawnAttempts; i++)
         {
@@ -81,29 +88,28 @@ public class TreeSpawner : MonoBehaviour
                 continue;
             }
 
-            // Βεβαιωνόμαστε ότι χτυπήσαμε procedural terrain.
             if (hit.collider.GetComponent<TerrainChunk>() == null)
             {
                 continue;
             }
 
             float normalizedHeight =
-                hit.point.y / settings.heightMultiplier;
-
-            normalizedHeight = Mathf.Clamp01(normalizedHeight);
+                Mathf.Clamp01(
+                    hit.point.y / settings.heightMultiplier
+                );
 
             BiomeType biome =
                 BiomeGenerator.GetBiome(normalizedHeight);
 
             float spawnChance;
 
-            if (biome == BiomeType.Forest)
-            {
-                spawnChance = forestSpawnChance;
-            }
-            else if (biome == BiomeType.Grass)
+            if (biome == BiomeType.Grass)
             {
                 spawnChance = grassSpawnChance;
+            }
+            else if (biome == BiomeType.Forest)
+            {
+                spawnChance = forestSpawnChance;
             }
             else
             {
@@ -123,17 +129,19 @@ public class TreeSpawner : MonoBehaviour
                 continue;
             }
 
-            SpawnTree(hit.point, spawnedTrees);
-            spawnedTrees++;
+            SpawnBush(hit.point, spawnedBushes);
+            spawnedBushes++;
         }
 
-        Debug.Log($"TreeSpawner generated {spawnedTrees} trees.");
+        Debug.Log(
+            $"BushSpawner generated {spawnedBushes} bushes."
+        );
     }
 
-    private void SpawnTree(Vector3 position, int index)
+    private void SpawnBush(Vector3 position, int index)
     {
         GameObject prefab =
-            treePrefabs[Random.Range(0, treePrefabs.Length)];
+            bushPrefabs[Random.Range(0, bushPrefabs.Length)];
 
         Quaternion rotation = Quaternion.Euler(
             0f,
@@ -141,39 +149,47 @@ public class TreeSpawner : MonoBehaviour
             0f
         );
 
-        GameObject tree = Instantiate(
+        GameObject bush = Instantiate(
             prefab,
             position,
             rotation,
-            treesParent
+            bushesParent
         );
 
-        tree.name = $"Tree_{index:0000}";
+        bush.name = $"Bush_{index:0000}";
 
         float randomScale =
             Random.Range(minimumScale, maximumScale);
 
-        tree.transform.localScale *= randomScale;
-        ResourceNode node = tree.GetComponent<ResourceNode>();
+        bush.transform.localScale *= randomScale;
 
-        if (node == null)
+        if (Random.value <= foodBushChance)
         {
-            node = tree.AddComponent<ResourceNode>();
-        }
+            ResourceNode node =
+                bush.GetComponent<ResourceNode>();
 
-        node.Initialize(
-            ResourceKind.Wood,
-            5,
-            Random.Range(3, 7)
-        );
+            if (node == null)
+            {
+                node = bush.AddComponent<ResourceNode>();
+            }
+
+            node.Initialize(
+                ResourceKind.Food,
+                1,
+                Random.Range(
+                    minimumFoodDrop,
+                    maximumFoodDrop + 1
+                )
+            );
+        }
     }
 
-    private void ClearExistingTrees()
+    private void ClearExistingBushes()
     {
-        for (int i = treesParent.childCount - 1; i >= 0; i--)
+        for (int i = bushesParent.childCount - 1; i >= 0; i--)
         {
             GameObject child =
-                treesParent.GetChild(i).gameObject;
+                bushesParent.GetChild(i).gameObject;
 
             if (Application.isPlaying)
             {

@@ -128,6 +128,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 109483044}
+  - component: {fileID: 109483045}
   m_Layer: 0
   m_Name: Rocks
   m_TagString: Untagged
@@ -150,6 +151,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1189211027}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &109483045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 109483043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3a76800bd67aab43ab566f53604f993, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RockSpawner
+  settings: {fileID: 11400000, guid: 36fbda6ba644c0c428e652d96c2832c5, type: 2}
+  rockPrefabs:
+  - {fileID: 1662893285416024, guid: 5a60148c447964be0b205453902a9963, type: 3}
+  rocksParent: {fileID: 109483044}
+  spawnAttempts: 900
+  sandSpawnChance: 0.03
+  grassSpawnChance: 0.05
+  rockBiomeSpawnChance: 0.55
+  raycastHeight: 100
+  maximumSlope: 35
+  minimumScale: 0.7
+  maximumScale: 1.6
 --- !u!1 &185257697
 GameObject:
   m_ObjectHideFlags: 0
@@ -791,9 +816,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WorldGenerator
   settings: {fileID: 11400000, guid: 36fbda6ba644c0c428e652d96c2832c5, type: 2}
+  treeSpawner: {fileID: 1593584443}
+  rockSpawner: {fileID: 109483045}
   terrainParent: {fileID: 2100060859}
   terrainMaterial: {fileID: 2100000, guid: b100e5fa27643cb43b08784ab112f055, type: 2}
-  waterGenerator: {fileID: 0}
+  waterGenerator: {fileID: 551171710}
+  bushSpawner: {fileID: 1616137690}
 --- !u!4 &1189211027
 Transform:
   m_ObjectHideFlags: 0
@@ -807,6 +835,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1616137689}
   - {fileID: 2100060859}
   - {fileID: 551171709}
   - {fileID: 1593584442}
@@ -860,8 +889,8 @@ GameObject:
   - component: {fileID: 1334138922}
   - component: {fileID: 1334138921}
   - component: {fileID: 1334138920}
-  - component: {fileID: 1334138919}
   - component: {fileID: 1334138925}
+  - component: {fileID: 1334138919}
   - component: {fileID: 1334138929}
   - component: {fileID: 1334138928}
   - component: {fileID: 1334138927}
@@ -1009,7 +1038,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 53.3, y: 18.1, z: 59.4}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 330585546}
@@ -1134,6 +1163,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1593584442}
+  - component: {fileID: 1593584443}
   m_Layer: 0
   m_Name: Trees
   m_TagString: Untagged
@@ -1156,6 +1186,87 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1189211027}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1593584443
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1593584441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b241112e20b8aa5419f8769953bc68e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TreeSpawner
+  settings: {fileID: 11400000, guid: 36fbda6ba644c0c428e652d96c2832c5, type: 2}
+  treePrefabs:
+  - {fileID: 1456460145525984, guid: 1f833c5ccc3974c4396264f9bff59605, type: 3}
+  treesParent: {fileID: 1593584442}
+  spawnAttempts: 1200
+  grassSpawnChance: 0.12
+  forestSpawnChance: 0.35
+  raycastHeight: 100
+  maximumSlope: 28
+  minimumScale: 0.8
+  maximumScale: 1.25
+--- !u!1 &1616137688
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1616137689}
+  - component: {fileID: 1616137690}
+  m_Layer: 0
+  m_Name: Bushes
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1616137689
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1616137688}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1189211027}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1616137690
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1616137688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4612ee1872c25143addd9f990631f33, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::BushSpawner
+  settings: {fileID: 11400000, guid: 36fbda6ba644c0c428e652d96c2832c5, type: 2}
+  bushPrefabs:
+  - {fileID: 1402999196279626, guid: 33f758be20ae240dfb03a0b39f0fa982, type: 3}
+  bushesParent: {fileID: 1616137689}
+  spawnAttempts: 900
+  grassSpawnChance: 0.18
+  forestSpawnChance: 0.28
+  raycastHeight: 100
+  maximumSlope: 25
+  minimumScale: 0.7
+  maximumScale: 1.3
+  foodBushChance: 0.35
+  minimumFoodDrop: 1
+  maximumFoodDrop: 3
 --- !u!1 &1897937951
 GameObject:
   m_ObjectHideFlags: 0

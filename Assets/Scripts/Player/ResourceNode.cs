@@ -13,6 +13,18 @@ public class ResourceNode : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    public void Initialize(
+        ResourceKind kind,
+        int health,
+        int amount
+    )
+    {
+        resourceKind = kind;
+        maxHealth = health;
+        dropAmount = amount;
+        currentHealth = maxHealth;
+    }
+
     public void Hit(int damage)
     {
         currentHealth -= damage;

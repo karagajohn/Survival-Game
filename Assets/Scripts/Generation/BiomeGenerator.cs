@@ -6,8 +6,7 @@ public enum BiomeType
     Sand,
     Grass,
     Forest,
-    Rock,
-    Snow
+    Rock
 }
 
 public static class BiomeGenerator
@@ -20,41 +19,33 @@ public static class BiomeGenerator
         if (height < 0.28f)
             return BiomeType.Sand;
 
-        if (height < 0.55f)
+        if (height < 0.58f)
             return BiomeType.Grass;
 
-        if (height < 0.75f)
+        if (height < 0.74f)
             return BiomeType.Forest;
 
-        if (height < 0.90f)
-            return BiomeType.Rock;
-
-        return BiomeType.Snow;
+        return BiomeType.Rock;
     }
 
     public static Color GetColor(float height)
     {
-        BiomeType biome = GetBiome(height);
-
-        switch (biome)
+        switch (GetBiome(height))
         {
             case BiomeType.Water:
-                return Color.blue;
+                return new Color(0.05f, 0.25f, 0.85f);
 
             case BiomeType.Sand:
-                return Color.yellow;
+                return new Color(0.90f, 0.80f, 0.35f);
 
             case BiomeType.Grass:
-                return Color.green;
+                return new Color(0.18f, 0.72f, 0.12f);
 
             case BiomeType.Forest:
-                return new Color(0f, 0.35f, 0f);
+                return new Color(0.03f, 0.32f, 0.06f);
 
             case BiomeType.Rock:
-                return Color.gray;
-
-            case BiomeType.Snow:
-                return Color.white;
+                return new Color(0.15f, 0.16f, 0.18f);
 
             default:
                 return Color.magenta;

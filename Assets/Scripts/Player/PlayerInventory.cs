@@ -8,6 +8,8 @@ public class PlayerInventory : MonoBehaviour
     public int wood;
     public int stone;
     public int food;
+    public int ironOre;
+    public int goldOre;
 
     public event Action OnChanged;
 
@@ -37,6 +39,14 @@ public class PlayerInventory : MonoBehaviour
             case ResourceKind.Food:
                 food += amount;
                 break;
+
+            case ResourceKind.IronOre:
+                ironOre += amount;
+                break;
+
+            case ResourceKind.GoldOre:
+                goldOre += amount;
+                break;    
         }
 
         Debug.Log($"Added {amount} {kind}");
@@ -66,6 +76,14 @@ public class PlayerInventory : MonoBehaviour
             case ResourceKind.Food:
                 food -= amount;
                 break;
+
+            case ResourceKind.IronOre:
+                ironOre -= amount;
+                break;
+
+            case ResourceKind.GoldOre:
+                goldOre -= amount;
+                break;
         }
 
         OnChanged?.Invoke();
@@ -84,6 +102,12 @@ public class PlayerInventory : MonoBehaviour
 
             case ResourceKind.Food:
                 return food;
+
+            case ResourceKind.IronOre:
+                return ironOre;
+
+            case ResourceKind.GoldOre:
+                return goldOre;
 
             default:
                 return 0;

@@ -4,11 +4,12 @@ public class WorldGenerator : MonoBehaviour
 {
     public WorldSettings settings;
     public TreeSpawner treeSpawner;
+    public RockSpawner rockSpawner;
     public Transform terrainParent;
-
     public Material terrainMaterial;
-
     public WaterGenerator waterGenerator;
+    public BushSpawner bushSpawner;
+    public OreSpawner oreSpawner;
 
     private void Start()
     {
@@ -24,10 +25,25 @@ public class WorldGenerator : MonoBehaviour
         {
             waterGenerator.GenerateWater();
         }
-        
+
         if (treeSpawner != null)
         {
             treeSpawner.GenerateTrees();
+        }
+
+        if (rockSpawner != null)
+        {
+            rockSpawner.GenerateRocks();
+        }
+
+        if (bushSpawner != null)
+        {
+            bushSpawner.GenerateBushes();
+        }
+
+        if (oreSpawner != null)
+        {
+            oreSpawner.GenerateOres();
         }
     }
 
