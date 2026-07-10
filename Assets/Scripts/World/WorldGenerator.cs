@@ -3,13 +3,17 @@ using UnityEngine;
 public class WorldGenerator : MonoBehaviour
 {
     public WorldSettings settings;
+
     public TreeSpawner treeSpawner;
     public RockSpawner rockSpawner;
+    
+    public BushSpawner bushSpawner;
+    public OreSpawner oreSpawner;
+    public GrassSpawner grassSpawner;
+
     public Transform terrainParent;
     public Material terrainMaterial;
     public WaterGenerator waterGenerator;
-    public BushSpawner bushSpawner;
-    public OreSpawner oreSpawner;
 
     private void Start()
     {
@@ -24,6 +28,11 @@ public class WorldGenerator : MonoBehaviour
         if (waterGenerator != null)
         {
             waterGenerator.GenerateWater();
+        }
+
+         if (grassSpawner != null)
+        {
+            grassSpawner.GenerateGrass();
         }
 
         if (treeSpawner != null)
