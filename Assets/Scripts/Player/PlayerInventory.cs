@@ -1,15 +1,24 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerInventory : MonoBehaviour
 {
     public static PlayerInventory Instance { get; private set; }
 
-    public int wood;
-    public int stone;
-    public int food;
-    public int ironOre;
-    public int goldOre;
+    [Header("References")]
+    public ItemRegistry itemRegistry;
+
+    [Header("Inventory")]
+    [Min(1)]
+    [SerializeField]
+    private int capacity = 24;
+
+    [SerializeField]
+    private List<InventorySlot> slots = new();
+
+    public IReadOnlyList<InventorySlot> Slots => slots;
+    public int Capacity => capacity;
 
     public event Action OnChanged;
 
@@ -22,35 +31,177 @@ public class PlayerInventory : MonoBehaviour
         }
 
         Instance = this;
+
+        InitializeSlots();
+    }
+
+    private void InitializeSlots()
+    {
+        if (slots == null)
+        {
+            slots = new List<InventorySlot>();
+        }
+
+        while (slots.Count < capacity)
+        {
+            slots.Add(new InventorySlot());
+        }
+
+        if (slots.Count > capacity)
+        {
+            slots.RemoveRange(
+                capacity,
+                slots.Count - capacity
+            );
+        }
+    }
+
+    public bool Add(ItemData item, int amount)
+    {
+        if (item == null || amount <= 0)
+        {
+            return false;
+        }
+
+        int remaining = amount;
+
+        foreach (InventorySlot slot in slots)
+        {
+            if (!slot.CanStack(item))
+            {
+                continue;
+            }
+
+            remaining = slot.Add(item, remaining);
+
+            if (remaining <= 0)
+            {
+                OnChanged?.Invoke();
+                return true;
+            }
+        }
+
+        foreach (InventorySlot slot in slots)
+        {
+            if (!slot.IsEmpty)
+            {
+                continue;
+            }
+
+            remaining = slot.Add(item, remaining);
+
+            if (remaining <= 0)
+            {
+                OnChanged?.Invoke();
+                return true;
+            }
+        }
+
+        OnChanged?.Invoke();
+
+        Debug.LogWarning(
+            $"Inventory full. Could not add " +
+            $"{remaining}x {item.displayName}."
+        );
+
+        return false;
     }
 
     public void Add(ResourceKind kind, int amount)
     {
-        switch (kind)
+        if (itemRegistry == null)
         {
-            case ResourceKind.Wood:
-                wood += amount;
-                break;
+            Debug.LogError(
+                "PlayerInventory: ItemRegistry is missing."
+            );
 
-            case ResourceKind.Stone:
-                stone += amount;
-                break;
-
-            case ResourceKind.Food:
-                food += amount;
-                break;
-
-            case ResourceKind.IronOre:
-                ironOre += amount;
-                break;
-
-            case ResourceKind.GoldOre:
-                goldOre += amount;
-                break;    
+            return;
         }
 
-        Debug.Log($"Added {amount} {kind}");
-        OnChanged?.Invoke();
+        ItemData item =
+            itemRegistry.GetItem(kind);
+
+        if (item == null)
+        {
+            return;
+        }
+
+        Add(item, amount);
+    }
+
+    public bool Remove(ItemData item, int amount)
+    {
+        if (item == null || amount <= 0)
+        {
+            return false;
+        }
+
+        if (GetQuantity(item) < amount)
+        {
+            return false;
+        }
+
+        int remaining = amount;
+
+        for (int i = slots.Count - 1; i >= 0; i--)
+        {
+            InventorySlot slot = slots[i];
+
+            if (slot.Item != item)
+            {
+                continue;
+            }
+
+            int amountToRemove =
+                Mathf.Min(
+                    remaining,
+                    slot.Quantity
+                );
+
+            slot.Remove(amountToRemove);
+            remaining -= amountToRemove;
+
+            if (remaining <= 0)
+            {
+                OnChanged?.Invoke();
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public int GetQuantity(ItemData item)
+    {
+        if (item == null)
+        {
+            return 0;
+        }
+
+        int total = 0;
+
+        foreach (InventorySlot slot in slots)
+        {
+            if (slot.Item == item)
+            {
+                total += slot.Quantity;
+            }
+        }
+
+        return total;
+    }
+
+    public int Get(ResourceKind kind)
+    {
+        if (itemRegistry == null)
+        {
+            return 0;
+        }
+
+        ItemData item =
+            itemRegistry.GetItem(kind);
+
+        return GetQuantity(item);
     }
 
     public bool Has(ResourceKind kind, int amount)
@@ -60,57 +211,19 @@ public class PlayerInventory : MonoBehaviour
 
     public bool Spend(ResourceKind kind, int amount)
     {
-        if (!Has(kind, amount))
-            return false;
-
-        switch (kind)
+        if (itemRegistry == null)
         {
-            case ResourceKind.Wood:
-                wood -= amount;
-                break;
-
-            case ResourceKind.Stone:
-                stone -= amount;
-                break;
-
-            case ResourceKind.Food:
-                food -= amount;
-                break;
-
-            case ResourceKind.IronOre:
-                ironOre -= amount;
-                break;
-
-            case ResourceKind.GoldOre:
-                goldOre -= amount;
-                break;
+            return false;
         }
 
-        OnChanged?.Invoke();
-        return true;
+        ItemData item =
+            itemRegistry.GetItem(kind);
+
+        return Remove(item, amount);
     }
 
-    public int Get(ResourceKind kind)
+    public bool Contains(ItemData item, int amount)
     {
-        switch (kind)
-        {
-            case ResourceKind.Wood:
-                return wood;
-
-            case ResourceKind.Stone:
-                return stone;
-
-            case ResourceKind.Food:
-                return food;
-
-            case ResourceKind.IronOre:
-                return ironOre;
-
-            case ResourceKind.GoldOre:
-                return goldOre;
-
-            default:
-                return 0;
-        }
+        return GetQuantity(item) >= amount;
     }
 }

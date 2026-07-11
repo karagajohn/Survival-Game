@@ -780,11 +780,68 @@ Transform:
   m_GameObject: {fileID: 1019452470}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -100, y: 0, z: 0}
+  m_LocalPosition: {x: 5.8, y: 0, z: 109}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1025751240
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1025751242}
+  - component: {fileID: 1025751241}
+  m_Layer: 0
+  m_Name: Grass
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1025751241
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1025751240}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5fd71f7654117dc458bd1389a7acb5bf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GrassSpawner
+  settings: {fileID: 11400000, guid: 36fbda6ba644c0c428e652d96c2832c5, type: 2}
+  grassPrefab: {fileID: 1570770338410986, guid: 9e70b90284568490b947f2cabb7e8536, type: 3}
+  grassMaterial: {fileID: 2100000, guid: 35a5455fa0b414c89b09e6e0d42888e0, type: 3}
+  spawnAttempts: 12000
+  grassBiomeChance: 0.7
+  forestBiomeChance: 0.4
+  raycastHeight: 100
+  maximumSlope: 32
+  minimumScale: 0.65
+  maximumScale: 1.2
+  verticalOffset: 0.02
+  castShadows: 0
+  receiveShadows: 1
+--- !u!4 &1025751242
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1025751240}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1189211027}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1189211024
 GameObject:
@@ -818,10 +875,12 @@ MonoBehaviour:
   settings: {fileID: 11400000, guid: 36fbda6ba644c0c428e652d96c2832c5, type: 2}
   treeSpawner: {fileID: 1593584443}
   rockSpawner: {fileID: 109483045}
+  bushSpawner: {fileID: 1616137690}
+  oreSpawner: {fileID: 1191986196}
+  grassSpawner: {fileID: 1025751241}
   terrainParent: {fileID: 2100060859}
   terrainMaterial: {fileID: 2100000, guid: b100e5fa27643cb43b08784ab112f055, type: 2}
   waterGenerator: {fileID: 551171710}
-  bushSpawner: {fileID: 1616137690}
 --- !u!4 &1189211027
 Transform:
   m_ObjectHideFlags: 0
@@ -843,7 +902,68 @@ Transform:
   - {fileID: 1332894519}
   - {fileID: 229539525}
   - {fileID: 495498568}
+  - {fileID: 1191986197}
+  - {fileID: 1025751242}
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1191986195
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1191986197}
+  - component: {fileID: 1191986196}
+  m_Layer: 0
+  m_Name: Ores
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1191986196
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1191986195}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 292e9d5583dbf414f92527308e22e0ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::OreSpawner
+  settings: {fileID: 11400000, guid: 36fbda6ba644c0c428e652d96c2832c5, type: 2}
+  oresParent: {fileID: 1191986197}
+  ironOrePrefabs:
+  - {fileID: 957718665714359422, guid: 8319eaea86eb5124ab4ab1bcc8cd90e3, type: 3}
+  goldOrePrefabs:
+  - {fileID: 7293986924164997460, guid: 072cdb6a37838af478f669b46e3e4e2b, type: 3}
+  spawnAttempts: 700
+  ironGrassChance: 0.025
+  ironRockChance: 0.22
+  goldGrassChance: 0.002
+  goldRockChance: 0.035
+  raycastHeight: 100
+  maximumSlope: 32
+  minimumScale: 0.75
+  maximumScale: 1.35
+--- !u!4 &1191986197
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1191986195}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1189211027}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1332894518
 GameObject:
@@ -895,6 +1015,7 @@ GameObject:
   - component: {fileID: 1334138928}
   - component: {fileID: 1334138927}
   - component: {fileID: 1334138926}
+  - component: {fileID: 1334138930}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -918,11 +1039,13 @@ MonoBehaviour:
   health: 100
   maxHunger: 100
   hunger: 100
-  maxStamina: 100
-  stamina: 100
   hungerDrainPerSecond: 0.5
   healthDrainWhenStarving: 5
+  maxStamina: 100
+  stamina: 100
   staminaRegenPerSecond: 15
+  staminaRegenDelay: 0.75
+  updateInterval: 0.1
 --- !u!143 &1334138920
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1059,9 +1182,13 @@ MonoBehaviour:
   cameraTransform: {fileID: 330585546}
   walkSpeed: 5
   sprintSpeed: 8
+  sprintStaminaPerSecond: 25
   jumpHeight: 1.5
   gravity: -20
   mouseSensitivity: 2
+  mouseSmoothTime: 0.04
+  minimumLookAngle: -80
+  maximumLookAngle: 80
 --- !u!114 &1334138926
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1120,9 +1247,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eac056ef7bc36c3409cbc8cffe200fb3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInventory
-  wood: 0
-  stone: 0
-  food: 0
+  itemRegistry: {fileID: 11400000, guid: d1613ee81b2998d4bbf309682ac29ec4, type: 2}
+  capacity: 24
+  slots: []
+--- !u!114 &1334138930
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1334138918}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11d9c03d38451f643bb985964eba4891, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerRespawn
+  respawnPoint: {fileID: 1019452471}
+  respawnDelay: 2
+  respawnHungerPercentage: 0.7
 --- !u!1 &1415843758
 GameObject:
   m_ObjectHideFlags: 0

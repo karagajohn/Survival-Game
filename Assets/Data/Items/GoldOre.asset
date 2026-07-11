@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6c38244ec90142409d50960058825f6, type: 3}
+  m_Name: GoldOre
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemId: gold_ore
+  displayName: Gold Ore
+  description: Rare ore used for valuable equipment.
+  itemType: 0
+  maxStackSize: 99
+  icon: {fileID: 21300000, guid: 91ef9911a4c63ed45a2b9cfc725e9530, type: 3}
+  worldPrefab: {fileID: 0}
+  heldPrefab: {fileID: 0}
+  baseValue: 8
+  gatherDamage: 0
+  attackDamage: 0
