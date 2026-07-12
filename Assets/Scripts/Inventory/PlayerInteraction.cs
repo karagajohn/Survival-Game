@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class PlayerInteraction : MonoBehaviour
 {
+    public EquipmentController equipmentController;
     public Camera playerCamera;
 
     public float range = 3f;
@@ -16,6 +17,11 @@ public class PlayerInteraction : MonoBehaviour
     {
         if (playerCamera == null)
             playerCamera = GetComponentInChildren<Camera>();
+            if (equipmentController == null)
+            {
+                equipmentController =
+                    GetComponent<EquipmentController>();
+            }
     }
 
     private void Update()
@@ -64,7 +70,8 @@ public class PlayerInteraction : MonoBehaviour
 
             if (resource != null)
             {
-                resource.Hit(gatherDamage);
+                int damage = GetResourceDamage(resource);
+                resource.Hit(damage);
                 return;
             }
 
@@ -72,23 +79,54 @@ public class PlayerInteraction : MonoBehaviour
 
             if (enemy != null)
             {
-                enemy.TakeDamage(attackDamage);
+                enemy.TakeDamage(GetAttackDamage());
                 return;
             }
         }
     }
-
-    public void UpgradeToStoneAxe()
+    private int GetResourceDamage(ResourceNode resource)
     {
-        gatherDamage = Mathf.Max(gatherDamage, 4);
-        attackDamage = Mathf.Max(attackDamage, 2);
-        Debug.Log("Equipped Stone Axe!");
+        ItemData equippedItem =
+            equipmentController != null
+                ? equipmentController.CurrentItem
+                : null;
+
+        if (equippedItem == null)
+        {
+            return 1;
+        }
+
+        switch (resource.nodeType)
+        {
+            case ResourceNodeType.Tree:
+                return Mathf.Max(1, equippedItem.treeDamage);
+
+            case ResourceNodeType.Rock:
+                return Mathf.Max(1, equippedItem.rockDamage);
+
+            case ResourceNodeType.Ore:
+                return Mathf.Max(1, equippedItem.oreDamage);
+
+            case ResourceNodeType.Food:
+                return 1;
+
+            default:
+                return 1;
+        }
     }
 
-    public void UpgradeToClub()
+    private int GetAttackDamage()
     {
-        attackDamage = Mathf.Max(attackDamage, 5);
-        Debug.Log("Equipped Club!");
+        ItemData equippedItem =
+            equipmentController != null
+                ? equipmentController.CurrentItem
+                : null;
+
+        if (equippedItem == null)
+        {
+            return 1;
+        }
+
+        return Mathf.Max(1, equippedItem.attackDamage);
     }
-    
 }

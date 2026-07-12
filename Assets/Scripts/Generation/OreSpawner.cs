@@ -211,6 +211,7 @@ public class OreSpawner : MonoBehaviour
 
         node.Initialize(
             resourceKind,
+            ResourceNodeType.Ore,
             health,
             dropAmount
         );

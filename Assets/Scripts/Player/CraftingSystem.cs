@@ -16,62 +16,14 @@ public class CraftingSystem : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1))
-        {
-            CraftStoneAxe();
-        }
 
-        if (Input.GetKeyDown(KeyCode.Alpha2))
-        {
-            CraftClub();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha3))
+        if (Input.GetKeyDown(KeyCode.Alpha9))
         {
             EatFood();
         }
     }
 
-    private void CraftStoneAxe()
-    {
-        PlayerInventory inv = PlayerInventory.Instance;
-
-        if (inv == null)
-            return;
-
-        if (inv.Has(ResourceKind.Wood, 5) && inv.Has(ResourceKind.Stone, 2))
-        {
-            inv.Spend(ResourceKind.Wood, 5);
-            inv.Spend(ResourceKind.Stone, 2);
-
-            interaction.UpgradeToStoneAxe();
-            Debug.Log("Crafted Stone Axe!");
-        }
-        else
-        {
-            Debug.Log("Need 5 Wood and 2 Stone for Stone Axe.");
-        }
-    }
-
-    private void CraftClub()
-    {
-        PlayerInventory inv = PlayerInventory.Instance;
-
-        if (inv == null)
-            return;
-
-        if (inv.Has(ResourceKind.Wood, 4))
-        {
-            inv.Spend(ResourceKind.Wood, 4);
-
-            interaction.UpgradeToClub();
-            Debug.Log("Crafted Club!");
-        }
-        else
-        {
-            Debug.Log("Need 4 Wood for Club.");
-        }
-    }
+    
 
     private void EatFood()
     {

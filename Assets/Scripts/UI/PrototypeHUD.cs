@@ -89,6 +89,9 @@ public class PrototypeHUD : MonoBehaviour
         GUILayout.Label("Left Click: Hit");
         GUILayout.Label("E: Interact");
 
+        GUILayout.Label("1-8: Select Hotbar Slot");
+        GUILayout.Label("Mouse Wheel: Change Hotbar Slot");
+
         GUILayout.EndArea();
     }
 }

@@ -172,6 +172,7 @@ public class BushSpawner : MonoBehaviour
 
         node.Initialize(
             ResourceKind.Food,
+            ResourceNodeType.Food,
             1,
             Random.Range(
                 minimumFoodDrop,

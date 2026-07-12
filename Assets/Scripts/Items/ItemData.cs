@@ -6,6 +6,12 @@ using UnityEngine;
 )]
 public class ItemData : ScriptableObject
 {
+    [Header("Equipment")]
+    public GameObject heldPrefab;
+    public Vector3 heldPosition;
+    public Vector3 heldRotation;
+    public Vector3 heldScale = Vector3.one;
+
     [Header("Identity")]
     public string itemId;
 
@@ -26,16 +32,23 @@ public class ItemData : ScriptableObject
     [Header("World")]
     public GameObject worldPrefab;
 
-    [Header("Equipment")]
-    public GameObject heldPrefab;
-
     [Header("Values")]
     [Min(0)]
     public int baseValue;
+    
 
     [Min(0)]
     public int gatherDamage = 1;
 
     [Min(0)]
     public int attackDamage = 1;
+
+    [Header("Tool")]
+    public ToolType toolType = ToolType.None;
+    [Min(0)]
+    public int treeDamage = 1;
+    [Min(0)]
+    public int rockDamage = 1;
+    [Min(0)]
+    public int oreDamage = 1;
 }

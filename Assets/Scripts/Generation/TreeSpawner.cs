@@ -163,6 +163,7 @@ public class TreeSpawner : MonoBehaviour
 
         node.Initialize(
             ResourceKind.Wood,
+            ResourceNodeType.Tree,
             5,
             Random.Range(3, 7)
         );

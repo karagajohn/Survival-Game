@@ -174,9 +174,12 @@ public class RockSpawner : MonoBehaviour
             node = rock.AddComponent<ResourceNode>();
         }
 
-        node.resourceKind = ResourceKind.Stone;
-        node.maxHealth = 4;
-        node.dropAmount = Random.Range(2, 5);
+        node.Initialize(
+            ResourceKind.Stone,
+            ResourceNodeType.Rock,
+            4,
+            Random.Range(2, 5)
+        );
     }
 
     private void ClearExistingRocks()
