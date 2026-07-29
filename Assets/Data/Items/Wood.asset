@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6c38244ec90142409d50960058825f6, type: 3}
   m_Name: Wood
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  heldPrefab: {fileID: 919132149155446097, guid: b1e1ca5dd8cb2f44bbcf115aa652a9af, type: 3}
+  heldPosition: {x: 0, y: 0, z: 0}
+  heldRotation: {x: 0, y: -90, z: 0}
+  heldScale: {x: 1, y: 1, z: 1}
   itemId: wood
   displayName: Wood
   description: Basic crafting material gathered from trees.
@@ -19,7 +23,10 @@ MonoBehaviour:
   maxStackSize: 99
   icon: {fileID: 21300000, guid: f38d6ff87bc10944290dad7c4e59ecc3, type: 3}
   worldPrefab: {fileID: 0}
-  heldPrefab: {fileID: 0}
   baseValue: 1
   gatherDamage: 1
   attackDamage: 1
+  toolType: 0
+  treeDamage: 1
+  rockDamage: 1
+  oreDamage: 1

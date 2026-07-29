@@ -12,21 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6c38244ec90142409d50960058825f6, type: 3}
   m_Name: StoneAxe
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  heldPrefab: {fileID: 0}
+  heldPrefab: {fileID: 7290881642464812636, guid: c2edd6c1db2e0044f98f69f8c409211c, type: 3}
   heldPosition: {x: 0, y: 0, z: 0}
-  heldRotation: {x: 0, y: 0, z: 0}
+  heldRotation: {x: 0, y: -90, z: 0}
   heldScale: {x: 1, y: 1, z: 1}
-  itemId: 
-  displayName: 
+  itemId: stone_axe
+  displayName: Stone Axe
   description: 
-  itemType: 0
-  maxStackSize: 99
-  icon: {fileID: 0}
+  itemType: 2
+  maxStackSize: 1
+  icon: {fileID: 21300000, guid: b33f7a6878b165f438e98a72c4de71ac, type: 3}
   worldPrefab: {fileID: 0}
   baseValue: 0
   gatherDamage: 1
-  attackDamage: 1
-  toolType: 0
-  treeDamage: 1
+  attackDamage: 2
+  toolType: 1
+  treeDamage: 4
   rockDamage: 1
   oreDamage: 1

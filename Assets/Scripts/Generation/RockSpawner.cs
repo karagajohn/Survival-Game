@@ -21,25 +21,47 @@ public class RockSpawner : MonoBehaviour
     public float rockBiomeSpawnChance = 0.40f;
 
     [Header("Placement")]
+    [Min(1f)]
     public float raycastHeight = 100f;
 
     [Range(0f, 60f)]
     public float maximumSlope = 35f;
 
-    public float minimumScale = 0.7f;
-    public float maximumScale = 1.6f;
+    [Min(0.01f)]
+    public float minimumScale = 0.65f;
+
+    [Min(0.01f)]
+    public float maximumScale = 1.15f;
+
+    [Tooltip(
+        "Percentage of the rock's height that is buried in the terrain."
+    )]
+    [Range(0f, 0.5f)]
+    public float groundSinkFraction = 0.22f;
+
+    [Tooltip(
+        "Additional fixed depth used to prevent a visible gap."
+    )]
+    [Min(0f)]
+    public float groundSinkDepth = 0.02f;
 
     public void GenerateRocks()
     {
         if (settings == null)
         {
-            Debug.LogError("RockSpawner: WorldSettings is missing.");
+            Debug.LogError(
+                "RockSpawner: WorldSettings is missing."
+            );
+
             return;
         }
 
-        if (rockPrefabs == null || rockPrefabs.Length == 0)
+        if (!HasValidPrefab())
         {
-            Debug.LogError("RockSpawner: No rock prefabs assigned.");
+            Debug.LogError(
+                "RockSpawner: No valid rock prefabs assigned."
+            );
+
             return;
         }
 
@@ -66,8 +88,15 @@ public class RockSpawner : MonoBehaviour
 
         for (int i = 0; i < spawnAttempts; i++)
         {
-            float randomX = Random.Range(0f, worldWidth);
-            float randomZ = Random.Range(0f, worldDepth);
+            float randomX = Random.Range(
+                0f,
+                worldWidth
+            );
+
+            float randomZ = Random.Range(
+                0f,
+                worldDepth
+            );
 
             Vector3 rayOrigin = new Vector3(
                 randomX,
@@ -79,7 +108,9 @@ public class RockSpawner : MonoBehaviour
                 rayOrigin,
                 Vector3.down,
                 out RaycastHit hit,
-                raycastHeight * 2f
+                raycastHeight * 2f,
+                ~0,
+                QueryTriggerInteraction.Ignore
             );
 
             if (!hitSomething)
@@ -87,18 +118,23 @@ public class RockSpawner : MonoBehaviour
                 continue;
             }
 
-            if (hit.collider.GetComponent<TerrainChunk>() == null)
+            TerrainChunk terrainChunk =
+                hit.collider.GetComponentInParent<TerrainChunk>();
+
+            if (terrainChunk == null)
             {
                 continue;
             }
 
-            float normalizedHeight =
-                hit.point.y / settings.heightMultiplier;
-
-            normalizedHeight = Mathf.Clamp01(normalizedHeight);
+            float normalizedHeight = Mathf.Clamp01(
+                hit.point.y /
+                settings.heightMultiplier
+            );
 
             BiomeType biome =
-                BiomeGenerator.GetBiome(normalizedHeight);
+                BiomeGenerator.GetBiome(
+                    normalizedHeight
+                );
 
             float spawnChance;
 
@@ -113,7 +149,8 @@ public class RockSpawner : MonoBehaviour
                     break;
 
                 case BiomeType.Rock:
-                    spawnChance = rockBiomeSpawnChance;
+                    spawnChance =
+                        rockBiomeSpawnChance;
                     break;
 
                 default:
@@ -125,16 +162,25 @@ public class RockSpawner : MonoBehaviour
                 continue;
             }
 
-            float slopeAngle =
-                Vector3.Angle(hit.normal, Vector3.up);
+            float slopeAngle = Vector3.Angle(
+                hit.normal,
+                Vector3.up
+            );
 
             if (slopeAngle > maximumSlope)
             {
                 continue;
             }
 
-            SpawnRock(hit.point, spawnedRocks);
-            spawnedRocks++;
+            bool spawned = SpawnRock(
+                hit.point,
+                spawnedRocks
+            );
+
+            if (spawned)
+            {
+                spawnedRocks++;
+            }
         }
 
         Debug.Log(
@@ -142,32 +188,59 @@ public class RockSpawner : MonoBehaviour
         );
     }
 
-    private void SpawnRock(Vector3 position, int index)
+    private bool SpawnRock(
+        Vector3 groundPosition,
+        int index
+    )
     {
-        GameObject prefab =
-            rockPrefabs[Random.Range(0, rockPrefabs.Length)];
+        GameObject prefab = GetRandomValidPrefab();
 
+        if (prefab == null)
+        {
+            return false;
+        }
+
+        // Only rotate around the Y axis.
+        // X/Z rotation could make the rock balance on one vertex.
         Quaternion rotation = Quaternion.Euler(
-            Random.Range(-8f, 8f),
+            0f,
             Random.Range(0f, 360f),
-            Random.Range(-8f, 8f)
+            0f
         );
 
         GameObject rock = Instantiate(
             prefab,
-            position,
+            groundPosition,
             rotation,
             rocksParent
         );
 
         rock.name = $"Rock_{index:0000}";
 
-        float randomScale =
-            Random.Range(minimumScale, maximumScale);
+        float safeMinimumScale = Mathf.Max(
+            0.01f,
+            minimumScale
+        );
+
+        float safeMaximumScale = Mathf.Max(
+            safeMinimumScale,
+            maximumScale
+        );
+
+        float randomScale = Random.Range(
+            safeMinimumScale,
+            safeMaximumScale
+        );
 
         rock.transform.localScale *= randomScale;
-        
-        ResourceNode node = rock.GetComponent<ResourceNode>();
+
+        SnapObjectToGround(
+            rock,
+            groundPosition.y
+        );
+
+        ResourceNode node =
+            rock.GetComponent<ResourceNode>();
 
         if (node == null)
         {
@@ -180,11 +253,179 @@ public class RockSpawner : MonoBehaviour
             4,
             Random.Range(2, 5)
         );
+
+        return true;
+    }
+
+    private void SnapObjectToGround(
+        GameObject spawnedObject,
+        float groundHeight
+    )
+    {
+        if (spawnedObject == null)
+        {
+            return;
+        }
+
+        if (!TryGetObjectBounds(
+                spawnedObject,
+                out Bounds objectBounds))
+        {
+            Debug.LogWarning(
+                $"{spawnedObject.name}: No Renderer or Collider " +
+                "was found for ground alignment."
+            );
+
+            return;
+        }
+
+        float proportionalSink =
+            objectBounds.size.y *
+            groundSinkFraction;
+
+        float targetBottomHeight =
+            groundHeight -
+            proportionalSink -
+            groundSinkDepth;
+
+        float verticalOffset =
+            targetBottomHeight -
+            objectBounds.min.y;
+
+        spawnedObject.transform.position +=
+            Vector3.up * verticalOffset;
+    }
+
+    private bool TryGetObjectBounds(
+        GameObject targetObject,
+        out Bounds combinedBounds
+    )
+    {
+        combinedBounds = new Bounds();
+        bool foundBounds = false;
+
+        Renderer[] renderers =
+            targetObject.GetComponentsInChildren<Renderer>(
+                true
+            );
+
+        foreach (Renderer objectRenderer in renderers)
+        {
+            if (objectRenderer == null)
+            {
+                continue;
+            }
+
+            if (!foundBounds)
+            {
+                combinedBounds =
+                    objectRenderer.bounds;
+
+                foundBounds = true;
+            }
+            else
+            {
+                combinedBounds.Encapsulate(
+                    objectRenderer.bounds
+                );
+            }
+        }
+
+        if (foundBounds)
+        {
+            return true;
+        }
+
+        Collider[] colliders =
+            targetObject.GetComponentsInChildren<Collider>(
+                true
+            );
+
+        foreach (Collider objectCollider in colliders)
+        {
+            if (objectCollider == null)
+            {
+                continue;
+            }
+
+            if (!foundBounds)
+            {
+                combinedBounds =
+                    objectCollider.bounds;
+
+                foundBounds = true;
+            }
+            else
+            {
+                combinedBounds.Encapsulate(
+                    objectCollider.bounds
+                );
+            }
+        }
+
+        return foundBounds;
+    }
+
+    private bool HasValidPrefab()
+    {
+        if (rockPrefabs == null ||
+            rockPrefabs.Length == 0)
+        {
+            return false;
+        }
+
+        foreach (GameObject prefab in rockPrefabs)
+        {
+            if (prefab != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private GameObject GetRandomValidPrefab()
+    {
+        if (!HasValidPrefab())
+        {
+            return null;
+        }
+
+        int startingIndex =
+            Random.Range(0, rockPrefabs.Length);
+
+        for (
+            int offset = 0;
+            offset < rockPrefabs.Length;
+            offset++
+        )
+        {
+            int index =
+                (startingIndex + offset) %
+                rockPrefabs.Length;
+
+            if (rockPrefabs[index] != null)
+            {
+                return rockPrefabs[index];
+            }
+        }
+
+        return null;
     }
 
     private void ClearExistingRocks()
     {
-        for (int i = rocksParent.childCount - 1; i >= 0; i--)
+        if (rocksParent == null)
+        {
+            return;
+        }
+
+        for (
+            int i = rocksParent.childCount - 1;
+            i >= 0;
+            i--
+        )
         {
             GameObject child =
                 rocksParent.GetChild(i).gameObject;

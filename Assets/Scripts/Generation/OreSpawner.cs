@@ -29,25 +29,39 @@ public class OreSpawner : MonoBehaviour
     public float goldRockChance = 0.035f;
 
     [Header("Placement")]
+    [Min(1f)]
     public float raycastHeight = 100f;
 
     [Range(0f, 60f)]
-    public float maximumSlope = 32f;
+    public float maximumSlope = 18f;
 
-    public float minimumScale = 0.75f;
-    public float maximumScale = 1.35f;
+    [Min(0.01f)]
+    public float minimumScale = 0.70f;
+
+    [Min(0.01f)]
+    public float maximumScale = 1.15f;
+
+    [Tooltip("How far the ore is buried into the terrain.")]
+    [Min(0f)]
+    public float groundSinkDepth = 0.03f;
 
     public void GenerateOres()
     {
         if (settings == null)
         {
-            Debug.LogError("OreSpawner: WorldSettings is missing.");
+            Debug.LogError(
+                "OreSpawner: WorldSettings is missing."
+            );
+
             return;
         }
 
         if (!HasAnyPrefabs())
         {
-            Debug.LogError("OreSpawner: No ore prefabs assigned.");
+            Debug.LogError(
+                "OreSpawner: No valid ore prefabs assigned."
+            );
+
             return;
         }
 
@@ -84,22 +98,31 @@ public class OreSpawner : MonoBehaviour
                 randomZ
             );
 
-            if (!Physics.Raycast(
-                    rayOrigin,
-                    Vector3.down,
-                    out RaycastHit hit,
-                    raycastHeight * 2f))
+            bool hitSomething = Physics.Raycast(
+                rayOrigin,
+                Vector3.down,
+                out RaycastHit hit,
+                raycastHeight * 2f,
+                ~0,
+                QueryTriggerInteraction.Ignore
+            );
+
+            if (!hitSomething)
             {
                 continue;
             }
 
-            if (hit.collider.GetComponent<TerrainChunk>() == null)
+            TerrainChunk terrainChunk =
+                hit.collider.GetComponentInParent<TerrainChunk>();
+
+            if (terrainChunk == null)
             {
                 continue;
             }
 
             float normalizedHeight = Mathf.Clamp01(
-                hit.point.y / settings.heightMultiplier
+                hit.point.y /
+                settings.heightMultiplier
             );
 
             BiomeType biome =
@@ -111,8 +134,10 @@ public class OreSpawner : MonoBehaviour
                 continue;
             }
 
-            float slopeAngle =
-                Vector3.Angle(hit.normal, Vector3.up);
+            float slopeAngle = Vector3.Angle(
+                hit.normal,
+                Vector3.up
+            );
 
             if (slopeAngle > maximumSlope)
             {
@@ -131,75 +156,110 @@ public class OreSpawner : MonoBehaviour
 
             float roll = Random.value;
 
-            // Ελέγχουμε πρώτα το Gold επειδή είναι πιο σπάνιο.
             if (roll <= goldChance &&
-                goldOrePrefabs != null &&
-                goldOrePrefabs.Length > 0)
+                HasValidPrefab(goldOrePrefabs))
             {
-                SpawnOre(
-                    goldOrePrefabs,
-                    hit.point,
-                    ResourceKind.GoldOre,
-                    8,
-                    Random.Range(1, 3),
-                    $"GoldOre_{goldCount:0000}"
-                );
-
-                goldCount++;
+                if (SpawnOre(
+                        goldOrePrefabs,
+                        hit.point,
+                        hit.normal,
+                        ResourceKind.GoldOre,
+                        8,
+                        Random.Range(1, 3),
+                        $"GoldOre_{goldCount:0000}"))
+                {
+                    goldCount++;
+                }
             }
-            else if (roll <= goldChance + ironChance &&
-                     ironOrePrefabs != null &&
-                     ironOrePrefabs.Length > 0)
+            else if (
+                roll <= goldChance + ironChance &&
+                HasValidPrefab(ironOrePrefabs))
             {
-                SpawnOre(
-                    ironOrePrefabs,
-                    hit.point,
-                    ResourceKind.IronOre,
-                    6,
-                    Random.Range(2, 5),
-                    $"IronOre_{ironCount:0000}"
-                );
-
-                ironCount++;
+                if (SpawnOre(
+                        ironOrePrefabs,
+                        hit.point,
+                        hit.normal,
+                        ResourceKind.IronOre,
+                        6,
+                        Random.Range(2, 5),
+                        $"IronOre_{ironCount:0000}"))
+                {
+                    ironCount++;
+                }
             }
         }
 
         Debug.Log(
-            $"OreSpawner generated {ironCount} iron ores and " +
-            $"{goldCount} gold ores."
+            $"OreSpawner generated {ironCount} iron ores " +
+            $"and {goldCount} gold ores."
         );
     }
 
-    private void SpawnOre(
+    private bool SpawnOre(
         GameObject[] prefabs,
-        Vector3 position,
+        Vector3 groundPosition,
+        Vector3 groundNormal,
         ResourceKind resourceKind,
         int health,
         int dropAmount,
-        string objectName)
+        string objectName
+    )
     {
         GameObject prefab =
-            prefabs[Random.Range(0, prefabs.Length)];
+            GetRandomValidPrefab(prefabs);
 
-        Quaternion rotation = Quaternion.Euler(
-            Random.Range(-6f, 6f),
-            Random.Range(0f, 360f),
-            Random.Range(-6f, 6f)
-        );
+        if (prefab == null)
+        {
+            return false;
+        }
+
+        groundNormal.Normalize();
+
+        Quaternion alignToGround =
+            Quaternion.FromToRotation(
+                Vector3.up,
+                groundNormal
+            );
+
+        Quaternion randomYaw =
+            Quaternion.AngleAxis(
+                Random.Range(0f, 360f),
+                groundNormal
+            );
+
+        Quaternion rotation =
+            randomYaw * alignToGround;
 
         GameObject ore = Instantiate(
             prefab,
-            position,
+            groundPosition,
             rotation,
             oresParent
         );
 
         ore.name = objectName;
 
-        float randomScale =
-            Random.Range(minimumScale, maximumScale);
+        float safeMinimumScale =
+            Mathf.Max(0.01f, minimumScale);
+
+        float safeMaximumScale =
+            Mathf.Max(
+                safeMinimumScale,
+                maximumScale
+            );
+
+        float randomScale = Random.Range(
+            safeMinimumScale,
+            safeMaximumScale
+        );
 
         ore.transform.localScale *= randomScale;
+
+        SnapObjectToGround(
+            ore,
+            groundPosition,
+            groundNormal
+        );
 
         ResourceNode node =
             ore.GetComponent<ResourceNode>();
@@ -215,24 +275,171 @@ public class OreSpawner : MonoBehaviour
             health,
             dropAmount
         );
+
+        return true;
+    }
+
+    private void SnapObjectToGround(
+        GameObject spawnedObject,
+        Vector3 groundPosition,
+        Vector3 groundNormal
+    )
+    {
+        if (!TryGetLowestVertexProjection(
+                spawnedObject,
+                groundNormal,
+                out float lowestProjection))
+        {
+            Debug.LogWarning(
+                $"{spawnedObject.name}: No MeshFilter " +
+                "with a valid mesh was found."
+            );
+
+            return;
+        }
+
+        float groundProjection =
+            Vector3.Dot(
+                groundPosition,
+                groundNormal
+            );
+
+        float targetProjection =
+            groundProjection - groundSinkDepth;
+
+        float movementDistance =
+            targetProjection - lowestProjection;
+
+        spawnedObject.transform.position +=
+            groundNormal * movementDistance;
+    }
+
+    private bool TryGetLowestVertexProjection(
+        GameObject targetObject,
+        Vector3 groundNormal,
+        out float lowestProjection
+    )
+    {
+        lowestProjection =
+            float.PositiveInfinity;
+
+        bool foundVertex = false;
+
+        MeshFilter[] meshFilters =
+            targetObject.GetComponentsInChildren<MeshFilter>(
+                true
+            );
+
+        foreach (MeshFilter meshFilter in meshFilters)
+        {
+            if (meshFilter == null ||
+                meshFilter.sharedMesh == null)
+            {
+                continue;
+            }
+
+            Vector3[] vertices =
+                meshFilter.sharedMesh.vertices;
+
+            Transform meshTransform =
+                meshFilter.transform;
+
+            foreach (Vector3 localVertex in vertices)
+            {
+                Vector3 worldVertex =
+                    meshTransform.TransformPoint(
+                        localVertex
+                    );
+
+                float projection =
+                    Vector3.Dot(
+                        worldVertex,
+                        groundNormal
+                    );
+
+                if (projection < lowestProjection)
+                {
+                    lowestProjection = projection;
+                }
+
+                foundVertex = true;
+            }
+        }
+
+        return foundVertex;
     }
 
     private bool HasAnyPrefabs()
     {
-        bool hasIron =
-            ironOrePrefabs != null &&
-            ironOrePrefabs.Length > 0;
+        return
+            HasValidPrefab(ironOrePrefabs) ||
+            HasValidPrefab(goldOrePrefabs);
+    }
 
-        bool hasGold =
-            goldOrePrefabs != null &&
-            goldOrePrefabs.Length > 0;
+    private bool HasValidPrefab(
+        GameObject[] prefabs
+    )
+    {
+        if (prefabs == null ||
+            prefabs.Length == 0)
+        {
+            return false;
+        }
 
-        return hasIron || hasGold;
+        foreach (GameObject prefab in prefabs)
+        {
+            if (prefab != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private GameObject GetRandomValidPrefab(
+        GameObject[] prefabs
+    )
+    {
+        if (!HasValidPrefab(prefabs))
+        {
+            return null;
+        }
+
+        int startingIndex =
+            Random.Range(0, prefabs.Length);
+
+        for (
+            int offset = 0;
+            offset < prefabs.Length;
+            offset++
+        )
+        {
+            int index =
+                (startingIndex + offset) %
+                prefabs.Length;
+
+            if (prefabs[index] != null)
+            {
+                return prefabs[index];
+            }
+        }
+
+        return null;
     }
 
     private void ClearExistingOres()
     {
-        for (int i = oresParent.childCount - 1; i >= 0; i--)
+        if (oresParent == null)
+        {
+            return;
+        }
+
+        for (
+            int i = oresParent.childCount - 1;
+            i >= 0;
+            i--
+        )
         {
             GameObject child =
                 oresParent.GetChild(i).gameObject;

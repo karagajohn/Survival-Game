@@ -51,4 +51,9 @@ public class ItemData : ScriptableObject
     public int rockDamage = 1;
     [Min(0)]
     public int oreDamage = 1;
+
+    [Header("Building Placement")]
+    public bool isPlaceable;
+
+    public GameObject placeablePrefab;
 }

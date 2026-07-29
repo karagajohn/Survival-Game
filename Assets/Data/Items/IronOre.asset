@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6c38244ec90142409d50960058825f6, type: 3}
   m_Name: IronOre
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  heldPrefab: {fileID: 1084728798392563482, guid: d4e2cbaef1d6a134b9f3f760bbd034ad, type: 3}
+  heldPosition: {x: 0, y: 0, z: 0}
+  heldRotation: {x: 0, y: 0, z: 0}
+  heldScale: {x: 0.7, y: 0.7, z: 0.7}
   itemId: iron_ore
   displayName: Iron Ore
   description: Raw iron used for smelting and crafting.
@@ -19,7 +23,10 @@ MonoBehaviour:
   maxStackSize: 99
   icon: {fileID: 21300000, guid: 12d2beacc67d3ba4bbe70ff3cf053e8e, type: 3}
   worldPrefab: {fileID: 0}
-  heldPrefab: {fileID: 0}
   baseValue: 4
   gatherDamage: 0
   attackDamage: 0
+  toolType: 0
+  treeDamage: 1
+  rockDamage: 1
+  oreDamage: 1

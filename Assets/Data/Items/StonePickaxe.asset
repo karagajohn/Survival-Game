@@ -12,21 +12,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6c38244ec90142409d50960058825f6, type: 3}
   m_Name: StonePickaxe
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  heldPrefab: {fileID: 0}
+  heldPrefab: {fileID: 4149291732820100751, guid: cba31c01769dbca4b90386d1ae35b220, type: 3}
   heldPosition: {x: 0, y: 0, z: 0}
-  heldRotation: {x: 0, y: 0, z: 0}
+  heldRotation: {x: 0, y: -90, z: 0}
   heldScale: {x: 1, y: 1, z: 1}
-  itemId: 
-  displayName: 
+  itemId: stone_pickaxe
+  displayName: Stone Pickaxe
   description: 
-  itemType: 0
-  maxStackSize: 99
-  icon: {fileID: 0}
+  itemType: 2
+  maxStackSize: 1
+  icon: {fileID: 21300000, guid: 1d0a276203ed6414ea45b84255c25b56, type: 3}
   worldPrefab: {fileID: 0}
   baseValue: 0
   gatherDamage: 1
-  attackDamage: 1
-  toolType: 0
+  attackDamage: 2
+  toolType: 2
   treeDamage: 1
-  rockDamage: 1
-  oreDamage: 1
+  rockDamage: 4
+  oreDamage: 5

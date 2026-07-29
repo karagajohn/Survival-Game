@@ -192,7 +192,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2992011306291912044}
   m_Layer: 0
-  m_Name: StoneAxe
+  m_Name: Stone Axe
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

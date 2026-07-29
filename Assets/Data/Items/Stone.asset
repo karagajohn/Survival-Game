@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6c38244ec90142409d50960058825f6, type: 3}
   m_Name: Stone
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  heldPrefab: {fileID: 8297238170206835941, guid: 758b826e2f61def41adc2b5dafd5b15a, type: 3}
+  heldPosition: {x: 0, y: 0, z: 0}
+  heldRotation: {x: 0, y: 0, z: 0}
+  heldScale: {x: 0.5, y: 0.5, z: 0.5}
   itemId: stone
   displayName: Stone
   description: Basic material gathered from rocks.
@@ -19,7 +23,10 @@ MonoBehaviour:
   maxStackSize: 99
   icon: {fileID: 21300000, guid: 70c86aad496dba246962df5cc1cb1dc9, type: 3}
   worldPrefab: {fileID: 0}
-  heldPrefab: {fileID: 0}
   baseValue: 1
   gatherDamage: 1
   attackDamage: 1
+  toolType: 0
+  treeDamage: 1
+  rockDamage: 1
+  oreDamage: 1

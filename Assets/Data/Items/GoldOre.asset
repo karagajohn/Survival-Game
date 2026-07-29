@@ -12,6 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b6c38244ec90142409d50960058825f6, type: 3}
   m_Name: GoldOre
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  heldPrefab: {fileID: 8609933177591253053, guid: bc27b7c89961fb44296052ce903be77d, type: 3}
+  heldPosition: {x: 0, y: 0, z: 0}
+  heldRotation: {x: 0, y: 0, z: 0}
+  heldScale: {x: 0.7, y: 0.7, z: 0.7}
   itemId: gold_ore
   displayName: Gold Ore
   description: Rare ore used for valuable equipment.
@@ -19,7 +23,10 @@ MonoBehaviour:
   maxStackSize: 99
   icon: {fileID: 21300000, guid: 91ef9911a4c63ed45a2b9cfc725e9530, type: 3}
   worldPrefab: {fileID: 0}
-  heldPrefab: {fileID: 0}
   baseValue: 8
   gatherDamage: 0
   attackDamage: 0
+  toolType: 0
+  treeDamage: 1
+  rockDamage: 1
+  oreDamage: 1
