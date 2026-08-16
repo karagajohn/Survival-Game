@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using Unity.AI.Navigation;
 
 public class WorldGenerator : MonoBehaviour
 {
@@ -6,7 +8,7 @@ public class WorldGenerator : MonoBehaviour
 
     public TreeSpawner treeSpawner;
     public RockSpawner rockSpawner;
-    
+
     public BushSpawner bushSpawner;
     public OreSpawner oreSpawner;
     public GrassSpawner grassSpawner;
@@ -14,6 +16,9 @@ public class WorldGenerator : MonoBehaviour
     public Transform terrainParent;
     public Material terrainMaterial;
     public WaterGenerator waterGenerator;
+
+    [Header("Navigation")]
+    public NavMeshSurface navMeshSurface;
 
     private void Start()
     {
@@ -30,7 +35,7 @@ public class WorldGenerator : MonoBehaviour
             waterGenerator.GenerateWater();
         }
 
-         if (grassSpawner != null)
+        if (grassSpawner != null)
         {
             grassSpawner.GenerateGrass();
         }
@@ -54,6 +59,28 @@ public class WorldGenerator : MonoBehaviour
         {
             oreSpawner.GenerateOres();
         }
+
+        StartCoroutine(BuildNavMeshAfterWorldGeneration());
+    }
+
+    private IEnumerator BuildNavMeshAfterWorldGeneration()
+    {
+        // Περιμένουμε ώστε να ολοκληρωθεί η δημιουργία
+        // των runtime MeshColliders και των υπόλοιπων objects.
+        yield return null;
+        yield return new WaitForEndOfFrame();
+
+        if (navMeshSurface == null)
+        {
+            Debug.LogError("NavMesh Surface missing!");
+            yield break;
+        }
+
+        Debug.Log("Building NavMesh...");
+
+        navMeshSurface.BuildNavMesh();
+
+        Debug.Log("NavMesh build completed!");
     }
 
     private void GenerateChunks()
@@ -63,7 +90,23 @@ public class WorldGenerator : MonoBehaviour
             for (int z = 0; z < settings.chunksZ; z++)
             {
                 GameObject chunkObject = new GameObject($"Chunk_{x}_{z}");
+
                 chunkObject.transform.parent = terrainParent;
+
+                // Το procedural terrain ανήκει στο Ground layer.
+                int groundLayer = LayerMask.NameToLayer("Ground");
+
+                if (groundLayer == -1)
+                {
+                    Debug.LogError(
+                        "Ground layer was not found! " +
+                        "Please create a layer named 'Ground'."
+                    );
+                }
+                else
+                {
+                    chunkObject.layer = groundLayer;
+                }
 
                 MeshRenderer renderer = chunkObject.AddComponent<MeshRenderer>();
                 renderer.material = terrainMaterial;
