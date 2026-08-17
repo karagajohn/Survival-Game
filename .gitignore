@@ -22,3 +22,5 @@ MemoryCaptures/
 
 .DS_Store
 Thumbs.db
+# Unity recovery files
+Assets/_Recovery/

@@ -1842,13 +1842,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveSpawner
   dayNightCycle: {fileID: 700887353}
-  enemyPrefab: {fileID: 0}
+  enemyPrefab: {fileID: 3661650219869078337, guid: f3f26804650d6ff4bbb724bb568ae6de, type: 3}
   spawnPoints:
   - {fileID: 1415843759}
   - {fileID: 1897937952}
   - {fileID: 1019452471}
   - {fileID: 185257698}
   baseEnemiesPerWave: 2
+  spawnSearchRadius: 15
+  maxSpawnAttempts: 10
 --- !u!114 &700887353
 MonoBehaviour:
   m_ObjectHideFlags: 0

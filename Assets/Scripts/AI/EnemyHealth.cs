@@ -1,4 +1,6 @@
+using System.Collections;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class EnemyHealth : MonoBehaviour
 {
@@ -25,8 +27,16 @@ public class EnemyHealth : MonoBehaviour
     [SerializeField]
     private float lootHeightOffset = 0.25f;
 
+    [Header("Death")]
+    [SerializeField]
+    private float deathAnimationDuration = 1.5f;
+
     private int currentHealth;
     private bool isDead;
+
+    private Animator animator;
+    private NavMeshAgent navMeshAgent;
+    private EnemyAI enemyAI;
 
     public int CurrentHealth => currentHealth;
     public int MaxHealth => maxHealth;
@@ -35,6 +45,10 @@ public class EnemyHealth : MonoBehaviour
     private void Awake()
     {
         currentHealth = maxHealth;
+
+        animator = GetComponent<Animator>();
+        navMeshAgent = GetComponent<NavMeshAgent>();
+        enemyAI = GetComponent<EnemyAI>();
     }
 
     public void TakeDamage(int amount)
@@ -67,9 +81,38 @@ public class EnemyHealth : MonoBehaviour
 
         isDead = true;
 
-        DropLoot();
+        // Σταματάμε το AI.
+        if (enemyAI != null)
+        {
+            enemyAI.enabled = false;
+        }
+
+        // Σταματάμε το NavMeshAgent.
+        if (navMeshAgent != null)
+        {
+            navMeshAgent.isStopped = true;
+            navMeshAgent.ResetPath();
+        }
+
+        // Παίζουμε το Death animation.
+        if (animator != null)
+        {
+            animator.SetBool("IsMoving", false);
+            animator.ResetTrigger("Attack");
+            animator.SetTrigger("Death");
+        }
 
         Debug.Log($"{gameObject.name} died.");
+
+        StartCoroutine(DeathSequence());
+    }
+
+    private IEnumerator DeathSequence()
+    {
+        // Περιμένουμε να ολοκληρωθεί το Death animation.
+        yield return new WaitForSeconds(deathAnimationDuration);
+
+        DropLoot();
 
         Destroy(gameObject);
     }
