@@ -19,14 +19,17 @@ MonoBehaviour:
   itemId: food
   displayName: Food
   description: Basic material gathered from bushes.
-  itemType: 0
+  itemType: 1
   maxStackSize: 99
   icon: {fileID: 21300000, guid: 31f6baecaf3e7834984f0a890ef84456, type: 3}
-  worldPrefab: {fileID: 0}
+  worldPrefab: {fileID: 331456756781410154, guid: b696bb12e010dd4458d5e6455b880291, type: 3}
   baseValue: 2
   gatherDamage: 0
   attackDamage: 0
+  hungerRestore: 25
   toolType: 0
   treeDamage: 1
   rockDamage: 1
   oreDamage: 1
+  isPlaceable: 0
+  placeablePrefab: {fileID: 0}

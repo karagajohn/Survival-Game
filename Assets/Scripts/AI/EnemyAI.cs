@@ -14,9 +14,8 @@ public class EnemyAI : MonoBehaviour
     [Header("Rotation")]
     public float rotationSpeed = 10f;
 
-    // Το συγκεκριμένο Goblin model έχει το forward του
-    // στραμμένο προς την αντίθετη κατεύθυνση.
-    private const float ModelRotationOffset = 180f;
+    [Tooltip("Rotation offset of the visual model relative to the enemy root.")]
+    public float modelRotationOffset = 180f;
 
     private NavMeshAgent agent;
     private PlayerStats playerStats;
@@ -104,11 +103,11 @@ public class EnemyAI : MonoBehaviour
             Quaternion targetRotation =
                 Quaternion.LookRotation(direction);
 
-            // Το Goblin model είναι γυρισμένο 180°.
+            // Rotation offset του συγκεκριμένου model.
             targetRotation *=
                 Quaternion.Euler(
                     0f,
-                    ModelRotationOffset,
+                    modelRotationOffset,
                     0f
                 );
 

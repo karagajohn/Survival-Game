@@ -35,7 +35,6 @@ public class ItemData : ScriptableObject
     [Header("Values")]
     [Min(0)]
     public int baseValue;
-    
 
     [Min(0)]
     public int gatherDamage = 1;
@@ -43,12 +42,19 @@ public class ItemData : ScriptableObject
     [Min(0)]
     public int attackDamage = 1;
 
+    [Header("Food")]
+    [Min(0)]
+    public float hungerRestore = 25f;
+
     [Header("Tool")]
     public ToolType toolType = ToolType.None;
+
     [Min(0)]
     public int treeDamage = 1;
+
     [Min(0)]
     public int rockDamage = 1;
+
     [Min(0)]
     public int oreDamage = 1;
 

@@ -22,7 +22,7 @@ MonoBehaviour:
   itemType: 0
   maxStackSize: 99
   icon: {fileID: 21300000, guid: 12d2beacc67d3ba4bbe70ff3cf053e8e, type: 3}
-  worldPrefab: {fileID: 0}
+  worldPrefab: {fileID: 8504530469932063301, guid: 2db12c6492fd34042a357979f7c84bca, type: 3}
   baseValue: 4
   gatherDamage: 0
   attackDamage: 0
@@ -30,3 +30,5 @@ MonoBehaviour:
   treeDamage: 1
   rockDamage: 1
   oreDamage: 1
+  isPlaceable: 0
+  placeablePrefab: {fileID: 0}

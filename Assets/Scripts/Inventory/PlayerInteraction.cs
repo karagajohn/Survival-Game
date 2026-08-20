@@ -9,12 +9,18 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField]
     private Camera playerCamera;
 
+    [SerializeField]
+    private PlayerStats playerStats;
+
     [Header("Interaction")]
     [SerializeField]
     private float range = 3f;
 
     [SerializeField]
     private KeyCode interactKey = KeyCode.E;
+
+    [SerializeField]
+    private GameObject interactionPrompt;
 
     [Header("Combat")]
     [SerializeField]
@@ -28,17 +34,26 @@ public class PlayerInteraction : MonoBehaviour
 
     private float nextHitTime;
 
+    private IInteractable currentInteractable;
+
     private void Awake()
     {
         if (playerCamera == null)
         {
-            playerCamera = GetComponentInChildren<Camera>();
+            playerCamera =
+                GetComponentInChildren<Camera>();
         }
 
         if (equipmentController == null)
         {
             equipmentController =
                 GetComponent<EquipmentController>();
+        }
+
+        if (playerStats == null)
+        {
+            playerStats =
+                GetComponent<PlayerStats>();
         }
 
         if (playerCamera == null)
@@ -54,24 +69,107 @@ public class PlayerInteraction : MonoBehaviour
                 "PlayerInteraction: EquipmentController was not found."
             );
         }
+
+        if (playerStats == null)
+        {
+            Debug.LogError(
+                "PlayerInteraction: PlayerStats was not found."
+            );
+        }
+
+        if (interactionPrompt != null)
+        {
+            interactionPrompt.SetActive(false);
+        }
     }
 
     private void Update()
     {
-        // Δεν εκτελούμε interactions όταν κάποιο UI είναι ανοικτό.
+        // Δεν εκτελούμε interactions
+        // όταν κάποιο UI είναι ανοικτό.
         if (Cursor.lockState != CursorLockMode.Locked)
         {
+            HideInteractionPrompt();
             return;
         }
 
+        UpdateInteractionPrompt();
+
         if (Input.GetMouseButtonDown(0))
         {
-            TryHit();
+            TryUseItem();
         }
 
         if (Input.GetKeyDown(interactKey))
         {
             TryInteract();
+        }
+    }
+
+    private void UpdateInteractionPrompt()
+    {
+        if (playerCamera == null ||
+            interactionPrompt == null)
+        {
+            return;
+        }
+
+        Ray ray =
+            playerCamera.ViewportPointToRay(
+                new Vector3(0.5f, 0.5f, 0f)
+            );
+
+        bool foundTarget =
+            Physics.Raycast(
+                ray,
+                out RaycastHit hit,
+                range,
+                ~0,
+                QueryTriggerInteraction.Ignore
+            );
+
+        if (!foundTarget)
+        {
+            HideInteractionPrompt();
+            return;
+        }
+
+        IInteractable interactable =
+            hit.collider.GetComponentInParent<IInteractable>();
+
+        if (interactable == null)
+        {
+            HideInteractionPrompt();
+            return;
+        }
+
+        currentInteractable =
+            interactable;
+
+        ShowInteractionPrompt();
+    }
+
+    private void ShowInteractionPrompt()
+    {
+        if (interactionPrompt == null)
+        {
+            return;
+        }
+
+        if (!interactionPrompt.activeSelf)
+        {
+            interactionPrompt.SetActive(true);
+        }
+    }
+
+    private void HideInteractionPrompt()
+    {
+        currentInteractable = null;
+
+        if (interactionPrompt != null &&
+            interactionPrompt.activeSelf)
+        {
+            interactionPrompt.SetActive(false);
         }
     }
 
@@ -82,17 +180,19 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
-        Ray ray = playerCamera.ViewportPointToRay(
-            new Vector3(0.5f, 0.5f, 0f)
-        );
+        Ray ray =
+            playerCamera.ViewportPointToRay(
+                new Vector3(0.5f, 0.5f, 0f)
+            );
 
-        bool foundTarget = Physics.Raycast(
-            ray,
-            out RaycastHit hit,
-            range,
-            ~0,
-            QueryTriggerInteraction.Ignore
-        );
+        bool foundTarget =
+            Physics.Raycast(
+                ray,
+                out RaycastHit hit,
+                range,
+                ~0,
+                QueryTriggerInteraction.Ignore
+            );
 
         if (!foundTarget)
         {
@@ -108,6 +208,113 @@ public class PlayerInteraction : MonoBehaviour
         }
     }
 
+    private void TryUseItem()
+    {
+        if (equipmentController == null)
+        {
+            return;
+        }
+
+        ItemData equippedItem =
+            equipmentController.CurrentItem;
+
+        if (equippedItem == null)
+        {
+            TryHit();
+            return;
+        }
+
+        // -------------------------------------------------
+        // FOOD
+        // -------------------------------------------------
+
+        if (equippedItem.itemType == ItemType.Food)
+        {
+            TryEat(equippedItem);
+            return;
+        }
+
+        // -------------------------------------------------
+        // PLACEABLE ITEMS
+        // -------------------------------------------------
+
+        if (equippedItem.isPlaceable)
+        {
+            return;
+        }
+
+        // -------------------------------------------------
+        // TOOLS / WEAPONS
+        // -------------------------------------------------
+
+        TryHit();
+    }
+
+    private void TryEat(ItemData food)
+    {
+        if (food == null)
+        {
+            return;
+        }
+
+        if (playerStats == null)
+        {
+            Debug.LogError(
+                "PlayerInteraction: PlayerStats was not found."
+            );
+
+            return;
+        }
+
+        if (PlayerInventory.Instance == null)
+        {
+            Debug.LogError(
+                "PlayerInteraction: PlayerInventory instance was not found."
+            );
+
+            return;
+        }
+
+        if (food.itemType != ItemType.Food)
+        {
+            return;
+        }
+
+        // Δεν τρώμε αν το hunger είναι ήδη γεμάτο.
+        if (playerStats.hunger >= playerStats.maxHunger)
+        {
+            Debug.Log("Hunger is already full.");
+
+            return;
+        }
+
+        // Αφαιρούμε πρώτα το Food από το inventory.
+        bool removed =
+            PlayerInventory.Instance.Remove(
+                food,
+                1
+            );
+
+        if (!removed)
+        {
+            Debug.LogWarning(
+                $"Could not consume {food.displayName}."
+            );
+
+            return;
+        }
+
+        // Προσθέτουμε το hunger.
+        playerStats.Eat(
+            food.hungerRestore
+        );
+
+        Debug.Log(
+            $"Ate {food.displayName}. " +
+            $"Hunger restored: {food.hungerRestore}"
+        );
+    }
+
     private void TryHit()
     {
         if (playerCamera == null)
@@ -115,13 +322,13 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
-        // Όταν κρατάμε Workbench ή άλλο building,
-        // το αριστερό κλικ χρησιμοποιείται μόνο για placement.
         ItemData equippedItem =
             equipmentController != null
                 ? equipmentController.CurrentItem
                 : null;
 
+        // Όταν κρατάμε Workbench ή άλλο building,
+        // το αριστερό κλικ χρησιμοποιείται μόνο για placement.
         if (equippedItem != null &&
             equippedItem.isPlaceable)
         {
@@ -133,20 +340,23 @@ public class PlayerInteraction : MonoBehaviour
             return;
         }
 
-        nextHitTime = Time.time + hitCooldown;
+        nextHitTime =
+            Time.time + hitCooldown;
 
-        Ray ray = new Ray(
-            playerCamera.transform.position,
-            playerCamera.transform.forward
-        );
+        Ray ray =
+            new Ray(
+                playerCamera.transform.position,
+                playerCamera.transform.forward
+            );
 
-        bool foundTarget = Physics.Raycast(
-            ray,
-            out RaycastHit hit,
-            range,
-            ~0,
-            QueryTriggerInteraction.Ignore
-        );
+        bool foundTarget =
+            Physics.Raycast(
+                ray,
+                out RaycastHit hit,
+                range,
+                ~0,
+                QueryTriggerInteraction.Ignore
+            );
 
         if (!foundTarget)
         {
@@ -158,9 +368,11 @@ public class PlayerInteraction : MonoBehaviour
 
         if (resource != null)
         {
-            int damage = GetResourceDamage(resource);
+            int damage =
+                GetResourceDamage(resource);
 
             resource.Hit(damage);
+
             return;
         }
 
@@ -169,11 +381,15 @@ public class PlayerInteraction : MonoBehaviour
 
         if (enemy != null)
         {
-            enemy.TakeDamage(GetAttackDamage());
+            enemy.TakeDamage(
+                GetAttackDamage()
+            );
         }
     }
 
-    private int GetResourceDamage(ResourceNode resource)
+    private int GetResourceDamage(
+        ResourceNode resource
+    )
     {
         ItemData equippedItem =
             equipmentController != null
@@ -182,34 +398,48 @@ public class PlayerInteraction : MonoBehaviour
 
         if (equippedItem == null)
         {
-            return Mathf.Max(1, gatherDamage);
+            return Mathf.Max(
+                1,
+                gatherDamage
+            );
         }
 
         switch (resource.nodeType)
         {
             case ResourceNodeType.Tree:
+
                 return Mathf.Max(
                     1,
                     equippedItem.treeDamage
                 );
 
             case ResourceNodeType.Rock:
+
                 return Mathf.Max(
                     1,
                     equippedItem.rockDamage
                 );
 
             case ResourceNodeType.Ore:
+
                 return Mathf.Max(
                     1,
                     equippedItem.oreDamage
                 );
 
             case ResourceNodeType.Food:
-                return Mathf.Max(1, gatherDamage);
+
+                return Mathf.Max(
+                    1,
+                    gatherDamage
+                );
 
             default:
-                return Mathf.Max(1, gatherDamage);
+
+                return Mathf.Max(
+                    1,
+                    gatherDamage
+                );
         }
     }
 
@@ -222,7 +452,10 @@ public class PlayerInteraction : MonoBehaviour
 
         if (equippedItem == null)
         {
-            return Mathf.Max(1, attackDamage);
+            return Mathf.Max(
+                1,
+                attackDamage
+            );
         }
 
         return Mathf.Max(

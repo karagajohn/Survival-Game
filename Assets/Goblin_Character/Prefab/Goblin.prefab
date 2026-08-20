@@ -41,15 +41,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: e4c88fe2e81511d4dae9da620550ecf9, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.5
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e4c88fe2e81511d4dae9da620550ecf9, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.5
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e4c88fe2e81511d4dae9da620550ecf9, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.5
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: e4c88fe2e81511d4dae9da620550ecf9, type: 3}
       propertyPath: m_LocalPosition.x
@@ -325,7 +325,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 3.5
+  m_Speed: 2
   m_Acceleration: 10
   avoidancePriority: 50
   m_AngularSpeed: 360
@@ -375,8 +375,9 @@ MonoBehaviour:
   target: {fileID: 0}
   attackRange: 2
   attackCooldown: 1.2
-  damage: 10
+  damage: 2
   rotationSpeed: 10
+  modelRotationOffset: 180
 --- !u!114 &7540447899207692185
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -389,8 +390,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c0de32ab38ed3f4184be77b0bc2f83d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 50
-  lootPrefab: {fileID: 0}
+  maxHealth: 25
+  lootTable:
+  - item: {fileID: 11400000, guid: 7e12ded309db040498939cea04b70d12, type: 2}
+    chance: 50
+  - item: {fileID: 11400000, guid: 36fd514b31ba509409e2e55b0cad2017, type: 2}
+    chance: 30
+  - item: {fileID: 11400000, guid: b33279855a7b79c4ea097314c3af620d, type: 2}
+    chance: 15
+  - item: {fileID: 11400000, guid: b2fa138ba99280f43b54f22c96927b3f, type: 2}
+    chance: 5
   minimumLootAmount: 1
   maximumLootAmount: 2
   lootSpreadRadius: 0.5

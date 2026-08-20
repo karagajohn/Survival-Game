@@ -1,16 +1,26 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class WaveSpawner : MonoBehaviour
 {
+    [Serializable]
+    public class EnemySpawnEntry
+    {
+        public GameObject enemyPrefab;
+
+        [Min(0)]
+        public int weight = 100;
+    }
+
     [Header("References")]
     public DayNightCycle dayNightCycle;
-    public GameObject enemyPrefab;
+    public EnemySpawnEntry[] enemyPrefabs;
     public Transform[] spawnPoints;
 
     [Header("Wave Scaling")]
     [Min(0)]
-    public int baseEnemiesPerWave = 2;
+    public int baseEnemiesPerWave = 3;
 
     [Min(0)]
     public int enemiesAddedPerNight = 1;
@@ -33,7 +43,7 @@ public class WaveSpawner : MonoBehaviour
         if (dayNightCycle == null)
             return;
 
-        if (enemyPrefab == null)
+        if (enemyPrefabs == null || enemyPrefabs.Length == 0)
             return;
 
         if (spawnPoints == null || spawnPoints.Length == 0)
@@ -94,37 +104,47 @@ public class WaveSpawner : MonoBehaviour
         {
             Transform spawnPoint =
                 spawnPoints[
-                    Random.Range(0, spawnPoints.Length)
+                    UnityEngine.Random.Range(
+                        0,
+                        spawnPoints.Length
+                    )
                 ];
 
             if (spawnPoint == null)
                 continue;
 
-            if (NavMesh.SamplePosition(
+            if (!NavMesh.SamplePosition(
                     spawnPoint.position,
                     out NavMeshHit hit,
                     spawnSearchRadius,
                     NavMesh.AllAreas))
             {
-                GameObject enemy = Instantiate(
-                    enemyPrefab,
-                    hit.position,
-                    spawnPoint.rotation
-                );
-
-                NavMeshAgent agent =
-                    enemy.GetComponent<NavMeshAgent>();
-
-                if (agent != null && !agent.isOnNavMesh)
-                {
-                    Debug.LogWarning(
-                        $"Enemy {enemy.name} spawned " +
-                        $"but is not connected to the NavMesh."
-                    );
-                }
-
-                return true;
+                continue;
             }
+
+            GameObject enemyPrefab = GetRandomEnemyPrefab();
+
+            if (enemyPrefab == null)
+                continue;
+
+            GameObject enemy = Instantiate(
+                enemyPrefab,
+                hit.position,
+                spawnPoint.rotation
+            );
+
+            NavMeshAgent agent =
+                enemy.GetComponent<NavMeshAgent>();
+
+            if (agent != null && !agent.isOnNavMesh)
+            {
+                Debug.LogWarning(
+                    $"Enemy {enemy.name} spawned " +
+                    $"but is not connected to the NavMesh."
+                );
+            }
+
+            return true;
         }
 
         Debug.LogWarning(
@@ -132,5 +152,59 @@ public class WaveSpawner : MonoBehaviour
         );
 
         return false;
+    }
+
+    private GameObject GetRandomEnemyPrefab()
+    {
+        int totalWeight = 0;
+
+        foreach (EnemySpawnEntry entry in enemyPrefabs)
+        {
+            if (entry == null)
+                continue;
+
+            if (entry.enemyPrefab == null)
+                continue;
+
+            if (entry.weight <= 0)
+                continue;
+
+            totalWeight += entry.weight;
+        }
+
+        if (totalWeight <= 0)
+        {
+            Debug.LogWarning(
+                "WaveSpawner has no valid enemy spawn weights."
+            );
+
+            return null;
+        }
+
+        int randomValue =
+            UnityEngine.Random.Range(0, totalWeight);
+
+        int currentWeight = 0;
+
+        foreach (EnemySpawnEntry entry in enemyPrefabs)
+        {
+            if (entry == null)
+                continue;
+
+            if (entry.enemyPrefab == null)
+                continue;
+
+            if (entry.weight <= 0)
+                continue;
+
+            currentWeight += entry.weight;
+
+            if (randomValue < currentWeight)
+            {
+                return entry.enemyPrefab;
+            }
+        }
+
+        return null;
     }
 }
