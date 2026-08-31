@@ -12,12 +12,18 @@ public class InventorySlot
 
     public ItemData Item => item;
     public int Quantity => quantity;
-    public bool IsEmpty => item == null || quantity <= 0;
+
+    public bool IsEmpty =>
+        item == null || quantity <= 0;
 
     public InventorySlot()
     {
         Clear();
     }
+
+    // =========================================================
+    // STACK
+    // =========================================================
 
     public bool CanStack(ItemData otherItem)
     {
@@ -26,9 +32,17 @@ public class InventorySlot
                quantity < item.maxStackSize;
     }
 
-    public int Add(ItemData newItem, int amount)
+    // =========================================================
+    // ADD
+    // =========================================================
+
+    public int Add(
+        ItemData newItem,
+        int amount
+    )
     {
-        if (newItem == null || amount <= 0)
+        if (newItem == null ||
+            amount <= 0)
         {
             return amount;
         }
@@ -46,12 +60,19 @@ public class InventorySlot
             item.maxStackSize - quantity;
 
         int amountToAdd =
-            Mathf.Min(amount, availableSpace);
+            Mathf.Min(
+                amount,
+                availableSpace
+            );
 
         quantity += amountToAdd;
 
         return amount - amountToAdd;
     }
+
+    // =========================================================
+    // REMOVE
+    // =========================================================
 
     public bool Remove(int amount)
     {
@@ -71,6 +92,37 @@ public class InventorySlot
 
         return true;
     }
+
+    // =========================================================
+    // SET
+    // Used by Save System
+    // =========================================================
+
+    public void Set(
+        ItemData newItem,
+        int newQuantity
+    )
+    {
+        if (newItem == null ||
+            newQuantity <= 0)
+        {
+            Clear();
+            return;
+        }
+
+        item = newItem;
+
+        quantity =
+            Mathf.Clamp(
+                newQuantity,
+                1,
+                item.maxStackSize
+            );
+    }
+
+    // =========================================================
+    // CLEAR
+    // =========================================================
 
     public void Clear()
     {

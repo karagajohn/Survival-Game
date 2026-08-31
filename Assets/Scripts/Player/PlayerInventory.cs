@@ -17,14 +17,22 @@ public class PlayerInventory : MonoBehaviour
     [SerializeField]
     private List<InventorySlot> slots = new();
 
-    public IReadOnlyList<InventorySlot> Slots => slots;
-    public int Capacity => capacity;
+    public IReadOnlyList<InventorySlot> Slots =>
+        slots;
+
+    public int Capacity =>
+        capacity;
 
     public event Action OnChanged;
 
+    // =========================================================
+    // INITIALIZATION
+    // =========================================================
+
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance != null &&
+            Instance != this)
         {
             Destroy(gameObject);
             return;
@@ -39,12 +47,15 @@ public class PlayerInventory : MonoBehaviour
     {
         if (slots == null)
         {
-            slots = new List<InventorySlot>();
+            slots =
+                new List<InventorySlot>();
         }
 
         while (slots.Count < capacity)
         {
-            slots.Add(new InventorySlot());
+            slots.Add(
+                new InventorySlot()
+            );
         }
 
         if (slots.Count > capacity)
@@ -56,14 +67,26 @@ public class PlayerInventory : MonoBehaviour
         }
     }
 
-    public bool Add(ItemData item, int amount)
+    // =========================================================
+    // ADD ITEM
+    // =========================================================
+
+    public bool Add(
+        ItemData item,
+        int amount
+    )
     {
-        if (item == null || amount <= 0)
+        if (item == null ||
+            amount <= 0)
         {
             return false;
         }
 
         int remaining = amount;
+
+        // -----------------------------------------------------
+        // TRY STACKING
+        // -----------------------------------------------------
 
         foreach (InventorySlot slot in slots)
         {
@@ -72,7 +95,11 @@ public class PlayerInventory : MonoBehaviour
                 continue;
             }
 
-            remaining = slot.Add(item, remaining);
+            remaining =
+                slot.Add(
+                    item,
+                    remaining
+                );
 
             if (remaining <= 0)
             {
@@ -81,6 +108,10 @@ public class PlayerInventory : MonoBehaviour
             }
         }
 
+        // -----------------------------------------------------
+        // TRY EMPTY SLOTS
+        // -----------------------------------------------------
+
         foreach (InventorySlot slot in slots)
         {
             if (!slot.IsEmpty)
@@ -88,7 +119,11 @@ public class PlayerInventory : MonoBehaviour
                 continue;
             }
 
-            remaining = slot.Add(item, remaining);
+            remaining =
+                slot.Add(
+                    item,
+                    remaining
+                );
 
             if (remaining <= 0)
             {
@@ -107,7 +142,14 @@ public class PlayerInventory : MonoBehaviour
         return false;
     }
 
-    public void Add(ResourceKind kind, int amount)
+    // =========================================================
+    // ADD RESOURCE
+    // =========================================================
+
+    public void Add(
+        ResourceKind kind,
+        int amount
+    )
     {
         if (itemRegistry == null)
         {
@@ -119,19 +161,32 @@ public class PlayerInventory : MonoBehaviour
         }
 
         ItemData item =
-            itemRegistry.GetItem(kind);
+            itemRegistry.GetItem(
+                kind
+            );
 
         if (item == null)
         {
             return;
         }
 
-        Add(item, amount);
+        Add(
+            item,
+            amount
+        );
     }
 
-    public bool Remove(ItemData item, int amount)
+    // =========================================================
+    // REMOVE ITEM
+    // =========================================================
+
+    public bool Remove(
+        ItemData item,
+        int amount
+    )
     {
-        if (item == null || amount <= 0)
+        if (item == null ||
+            amount <= 0)
         {
             return false;
         }
@@ -143,9 +198,14 @@ public class PlayerInventory : MonoBehaviour
 
         int remaining = amount;
 
-        for (int i = slots.Count - 1; i >= 0; i--)
+        for (
+            int i = slots.Count - 1;
+            i >= 0;
+            i--
+        )
         {
-            InventorySlot slot = slots[i];
+            InventorySlot slot =
+                slots[i];
 
             if (slot.Item != item)
             {
@@ -158,8 +218,12 @@ public class PlayerInventory : MonoBehaviour
                     slot.Quantity
                 );
 
-            slot.Remove(amountToRemove);
-            remaining -= amountToRemove;
+            slot.Remove(
+                amountToRemove
+            );
+
+            remaining -=
+                amountToRemove;
 
             if (remaining <= 0)
             {
@@ -171,7 +235,13 @@ public class PlayerInventory : MonoBehaviour
         return false;
     }
 
-    public int GetQuantity(ItemData item)
+    // =========================================================
+    // GET QUANTITY
+    // =========================================================
+
+    public int GetQuantity(
+        ItemData item
+    )
     {
         if (item == null)
         {
@@ -180,18 +250,28 @@ public class PlayerInventory : MonoBehaviour
 
         int total = 0;
 
-        foreach (InventorySlot slot in slots)
+        foreach (
+            InventorySlot slot
+            in slots
+        )
         {
             if (slot.Item == item)
             {
-                total += slot.Quantity;
+                total +=
+                    slot.Quantity;
             }
         }
 
         return total;
     }
 
-    public int Get(ResourceKind kind)
+    // =========================================================
+    // RESOURCE HELPERS
+    // =========================================================
+
+    public int Get(
+        ResourceKind kind
+    )
     {
         if (itemRegistry == null)
         {
@@ -199,17 +279,27 @@ public class PlayerInventory : MonoBehaviour
         }
 
         ItemData item =
-            itemRegistry.GetItem(kind);
+            itemRegistry.GetItem(
+                kind
+            );
 
-        return GetQuantity(item);
+        return GetQuantity(
+            item
+        );
     }
 
-    public bool Has(ResourceKind kind, int amount)
+    public bool Has(
+        ResourceKind kind,
+        int amount
+    )
     {
         return Get(kind) >= amount;
     }
 
-    public bool Spend(ResourceKind kind, int amount)
+    public bool Spend(
+        ResourceKind kind,
+        int amount
+    )
     {
         if (itemRegistry == null)
         {
@@ -217,13 +307,63 @@ public class PlayerInventory : MonoBehaviour
         }
 
         ItemData item =
-            itemRegistry.GetItem(kind);
+            itemRegistry.GetItem(
+                kind
+            );
 
-        return Remove(item, amount);
+        return Remove(
+            item,
+            amount
+        );
     }
 
-    public bool Contains(ItemData item, int amount)
+    public bool Contains(
+        ItemData item,
+        int amount
+    )
     {
         return GetQuantity(item) >= amount;
+    }
+
+    // =========================================================
+    // SAVE SYSTEM SUPPORT
+    // =========================================================
+
+    public void ClearAll()
+    {
+        foreach (
+            InventorySlot slot
+            in slots
+        )
+        {
+            slot.Clear();
+        }
+
+        OnChanged?.Invoke();
+    }
+
+    public bool SetSlot(
+        int index,
+        ItemData item,
+        int quantity
+    )
+    {
+        if (index < 0 ||
+            index >= slots.Count)
+        {
+            return false;
+        }
+
+        slots[index].Set(
+            item,
+            quantity
+        );
+
+        return true;
+    }
+
+    public void NotifyChanged()
+    {
+        OnChanged?.Invoke();
     }
 }

@@ -10,6 +10,9 @@ public class PlayerController : MonoBehaviour
     [Header("References")]
     public Transform cameraTransform;
 
+    [SerializeField]
+    private Animator animator;
+
     [Header("Movement")]
     public float walkSpeed = 5f;
     public float sprintSpeed = 8f;
@@ -44,6 +47,8 @@ public class PlayerController : MonoBehaviour
         stats = GetComponent<PlayerStats>();
 
         FindCameraIfMissing();
+        FindAnimatorIfMissing();
+
         LockCursor();
     }
 
@@ -51,19 +56,33 @@ public class PlayerController : MonoBehaviour
     {
         if (!inputEnabled)
         {
+            ResetAnimator();
             return;
         }
 
         HandleCursor();
 
+        // =====================================================
+        // DEATH
+        // =====================================================
+
         if (stats != null && stats.IsDead)
         {
+            UpdateDeathAnimation();
             return;
         }
+
+        // =====================================================
+        // NORMAL GAMEPLAY
+        // =====================================================
 
         Look();
         Move();
     }
+
+    // =========================================================
+    // REFERENCES
+    // =========================================================
 
     private void FindCameraIfMissing()
     {
@@ -77,7 +96,8 @@ public class PlayerController : MonoBehaviour
 
         if (playerCamera != null)
         {
-            cameraTransform = playerCamera.transform;
+            cameraTransform =
+                playerCamera.transform;
         }
         else
         {
@@ -87,6 +107,34 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void FindAnimatorIfMissing()
+    {
+        if (animator != null)
+        {
+            return;
+        }
+
+        animator =
+            GetComponentInChildren<Animator>();
+
+        if (animator != null)
+        {
+            Debug.Log(
+                "PlayerController: Animator found automatically."
+            );
+        }
+        else
+        {
+            Debug.LogError(
+                "PlayerController: No Animator found in Player children."
+            );
+        }
+    }
+
+    // =========================================================
+    // CAMERA LOOK
+    // =========================================================
+
     private void Look()
     {
         if (cameraTransform == null)
@@ -94,60 +142,87 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        Vector2 targetMouseDelta = new Vector2(
-            Input.GetAxisRaw("Mouse X"),
-            Input.GetAxisRaw("Mouse Y")
-        ) * mouseSensitivity;
+        Vector2 targetMouseDelta =
+            new Vector2(
+                Input.GetAxisRaw("Mouse X"),
+                Input.GetAxisRaw("Mouse Y")
+            ) * mouseSensitivity;
 
-        currentMouseDelta = Vector2.SmoothDamp(
-            currentMouseDelta,
-            targetMouseDelta,
-            ref mouseDeltaVelocity,
-            mouseSmoothTime
-        );
+        currentMouseDelta =
+            Vector2.SmoothDamp(
+                currentMouseDelta,
+                targetMouseDelta,
+                ref mouseDeltaVelocity,
+                mouseSmoothTime
+            );
 
         cameraPitch -= currentMouseDelta.y;
 
-        cameraPitch = Mathf.Clamp(
-            cameraPitch,
-            minimumLookAngle,
-            maximumLookAngle
-        );
+        cameraPitch =
+            Mathf.Clamp(
+                cameraPitch,
+                minimumLookAngle,
+                maximumLookAngle
+            );
 
         cameraTransform.localRotation =
-            Quaternion.Euler(cameraPitch, 0f, 0f);
+            Quaternion.Euler(
+                cameraPitch,
+                0f,
+                0f
+            );
 
         transform.Rotate(
-            Vector3.up * currentMouseDelta.x
+            Vector3.up *
+            currentMouseDelta.x
         );
     }
 
+    // =========================================================
+    // MOVEMENT
+    // =========================================================
+
     private void Move()
     {
-        bool isGrounded = controller.isGrounded;
+        bool isGrounded =
+            controller.isGrounded;
 
-        if (isGrounded && verticalVelocity.y < 0f)
+        if (animator != null)
+        {
+            animator.SetBool(
+                "IsGrounded",
+                isGrounded
+            );
+        }
+
+        if (isGrounded &&
+            verticalVelocity.y < 0f)
         {
             verticalVelocity.y = -2f;
         }
 
-        Vector2 movementInput = new Vector2(
-            Input.GetAxisRaw("Horizontal"),
-            Input.GetAxisRaw("Vertical")
-        );
+        Vector2 movementInput =
+            new Vector2(
+                Input.GetAxisRaw("Horizontal"),
+                Input.GetAxisRaw("Vertical")
+            );
 
-        movementInput = Vector2.ClampMagnitude(
-            movementInput,
-            1f
-        );
+        movementInput =
+            Vector2.ClampMagnitude(
+                movementInput,
+                1f
+            );
 
         Vector3 movementDirection =
-            transform.right * movementInput.x +
-            transform.forward * movementInput.y;
+            transform.right *
+            movementInput.x +
+            transform.forward *
+            movementInput.y;
 
-        float movementSpeed = GetMovementSpeed(
-            movementDirection
-        );
+        float movementSpeed =
+            GetMovementSpeed(
+                movementDirection
+            );
 
         controller.Move(
             movementDirection *
@@ -155,12 +230,20 @@ public class PlayerController : MonoBehaviour
             Time.deltaTime
         );
 
+        UpdateMovementAnimation(
+            movementInput,
+            movementSpeed
+        );
+
         HandleJump(isGrounded);
 
-        verticalVelocity.y += gravity * Time.deltaTime;
+        verticalVelocity.y +=
+            gravity *
+            Time.deltaTime;
 
         controller.Move(
-            verticalVelocity * Time.deltaTime
+            verticalVelocity *
+            Time.deltaTime
         );
     }
 
@@ -169,7 +252,8 @@ public class PlayerController : MonoBehaviour
     )
     {
         bool isMoving =
-            movementDirection.sqrMagnitude > 0.01f;
+            movementDirection.sqrMagnitude >
+            0.01f;
 
         bool wantsToSprint =
             Input.GetKey(KeyCode.LeftShift) &&
@@ -185,17 +269,133 @@ public class PlayerController : MonoBehaviour
             return sprintSpeed;
         }
 
-        bool hasStamina = stats.UseStamina(
-            sprintStaminaPerSecond *
-            Time.deltaTime
-        );
+        bool hasStamina =
+            stats.UseStamina(
+                sprintStaminaPerSecond *
+                Time.deltaTime
+            );
 
         return hasStamina
             ? sprintSpeed
             : walkSpeed;
     }
 
-    private void HandleJump(bool isGrounded)
+    // =========================================================
+    // ANIMATION - NORMAL MOVEMENT
+    // =========================================================
+
+    private void UpdateMovementAnimation(
+        Vector2 movementInput,
+        float movementSpeed
+    )
+    {
+        if (animator == null)
+        {
+            return;
+        }
+
+        // Player is alive again.
+        animator.SetBool(
+            "IsDead",
+            false
+        );
+
+        float speed =
+            movementInput.magnitude;
+
+        bool isMoving =
+            speed > 0.1f;
+
+        bool isSprinting =
+            isMoving &&
+            movementSpeed >=
+            sprintSpeed - 0.01f;
+
+        animator.SetFloat(
+            "Speed",
+            speed
+        );
+
+        animator.SetBool(
+            "Sprint",
+            isSprinting
+        );
+    }
+
+    // =========================================================
+    // ANIMATION - DEATH
+    // =========================================================
+
+    private void UpdateDeathAnimation()
+    {
+        if (animator == null)
+        {
+            Debug.LogError(
+                "PlayerController: Animator is NULL during death!"
+            );
+
+            return;
+        }
+
+        // Stop movement animation values.
+        animator.SetFloat(
+            "Speed",
+            0f
+        );
+
+        animator.SetBool(
+            "Sprint",
+            false
+        );
+
+        animator.SetBool(
+            "IsGrounded",
+            true
+        );
+
+        // This is the ONLY thing that tells
+        // the Animator Controller to enter Death.
+        animator.SetBool(
+            "IsDead",
+            true
+        );
+
+        Debug.Log(
+            "Death animation requested. Animator IsDead = " +
+            animator.GetBool("IsDead")
+        );
+    }
+
+    private void ResetAnimator()
+    {
+        if (animator == null)
+        {
+            return;
+        }
+
+        animator.SetFloat(
+            "Speed",
+            0f
+        );
+
+        animator.SetBool(
+            "Sprint",
+            false
+        );
+
+        animator.SetBool(
+            "IsGrounded",
+            true
+        );
+    }
+
+    // =========================================================
+    // JUMP
+    // =========================================================
+
+    private void HandleJump(
+        bool isGrounded
+    )
     {
         if (!isGrounded)
         {
@@ -207,20 +407,23 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        verticalVelocity.y = Mathf.Sqrt(
-            jumpHeight * -2f * gravity
-        );
+        verticalVelocity.y =
+            Mathf.Sqrt(
+                jumpHeight *
+                -2f *
+                gravity
+            );
     }
+
+    // =========================================================
+    // CURSOR
+    // =========================================================
 
     private void HandleCursor()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
-        {
-            UnlockCursor();
-        }
-
         if (Input.GetMouseButtonDown(0) &&
-            Cursor.lockState != CursorLockMode.Locked)
+            Cursor.lockState !=
+            CursorLockMode.Locked)
         {
             LockCursor();
         }
@@ -228,28 +431,50 @@ public class PlayerController : MonoBehaviour
 
     private void LockCursor()
     {
-        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.lockState =
+            CursorLockMode.Locked;
+
         Cursor.visible = false;
     }
 
-    private void UnlockCursor()
-    {
-        Cursor.lockState = CursorLockMode.None;
-        Cursor.visible = true;
-    }
+    // =========================================================
+    // PUBLIC CONTROL
+    // =========================================================
 
     public void ResetMotion()
     {
-        verticalVelocity = Vector3.zero;
+        verticalVelocity =
+            Vector3.zero;
+
+        currentMouseDelta =
+            Vector2.zero;
+
+        mouseDeltaVelocity =
+            Vector2.zero;
+
+        ResetAnimator();
     }
-    public void SetInputEnabled(bool enabled)
+
+    public void SetInputEnabled(
+        bool enabled
+    )
     {
         inputEnabled = enabled;
 
+        currentMouseDelta =
+            Vector2.zero;
+
+        mouseDeltaVelocity =
+            Vector2.zero;
+
         if (!enabled)
         {
-            currentMouseDelta = Vector2.zero;
-            mouseDeltaVelocity = Vector2.zero;
+            ResetAnimator();
+        }
+
+        if (enabled)
+        {
+            LockCursor();
         }
     }
 }

@@ -12,6 +12,9 @@ public class PlayerInteraction : MonoBehaviour
     [SerializeField]
     private PlayerStats playerStats;
 
+    [SerializeField]
+    private Animator animator;
+
     [Header("Interaction")]
     [SerializeField]
     private float range = 3f;
@@ -56,6 +59,12 @@ public class PlayerInteraction : MonoBehaviour
                 GetComponent<PlayerStats>();
         }
 
+        if (animator == null)
+        {
+            animator =
+                GetComponentInChildren<Animator>();
+        }
+
         if (playerCamera == null)
         {
             Debug.LogError(
@@ -74,6 +83,13 @@ public class PlayerInteraction : MonoBehaviour
         {
             Debug.LogError(
                 "PlayerInteraction: PlayerStats was not found."
+            );
+        }
+
+        if (animator == null)
+        {
+            Debug.LogWarning(
+                "PlayerInteraction: Animator was not found."
             );
         }
 
@@ -342,6 +358,19 @@ public class PlayerInteraction : MonoBehaviour
 
         nextHitTime =
             Time.time + hitCooldown;
+
+        // -------------------------------------------------
+        // ATTACK ANIMATION
+        // -------------------------------------------------
+
+        if (animator != null)
+        {
+            animator.SetTrigger("Attack");
+        }
+
+        // -------------------------------------------------
+        // HIT DETECTION
+        // -------------------------------------------------
 
         Ray ray =
             new Ray(

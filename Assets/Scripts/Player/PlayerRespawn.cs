@@ -10,6 +10,8 @@ public class PlayerRespawn : MonoBehaviour
 {
     [Header("Respawn")]
     public Transform respawnPoint;
+
+    [Min(0f)]
     public float respawnDelay = 2f;
 
     [Range(0f, 1f)]
@@ -23,8 +25,12 @@ public class PlayerRespawn : MonoBehaviour
 
     private void Awake()
     {
-        stats = GetComponent<PlayerStats>();
-        playerController = GetComponent<PlayerController>();
+        stats =
+            GetComponent<PlayerStats>();
+
+        playerController =
+            GetComponent<PlayerController>();
+
         characterController =
             GetComponent<CharacterController>();
     }
@@ -53,16 +59,30 @@ public class PlayerRespawn : MonoBehaviour
         }
 
         respawnCoroutine =
-            StartCoroutine(RespawnRoutine());
+            StartCoroutine(
+                RespawnRoutine()
+            );
     }
 
     private IEnumerator RespawnRoutine()
     {
+        // -----------------------------------------------------
+        // PLAYER REMAINS DEAD
+        // -----------------------------------------------------
+
         yield return new WaitForSeconds(
             respawnDelay
         );
 
+        // -----------------------------------------------------
+        // DISABLE CHARACTER CONTROLLER
+        // -----------------------------------------------------
+
         characterController.enabled = false;
+
+        // -----------------------------------------------------
+        // MOVE TO RESPAWN POINT
+        // -----------------------------------------------------
 
         if (respawnPoint != null)
         {
@@ -78,13 +98,29 @@ public class PlayerRespawn : MonoBehaviour
             );
         }
 
+        // -----------------------------------------------------
+        // RESET PLAYER MOTION
+        // -----------------------------------------------------
+
         playerController.ResetMotion();
 
+        // -----------------------------------------------------
+        // ENABLE CHARACTER CONTROLLER
+        // -----------------------------------------------------
+
         characterController.enabled = true;
+
+        // -----------------------------------------------------
+        // REVIVE PLAYER
+        // -----------------------------------------------------
 
         stats.Respawn(
             respawnHungerPercentage
         );
+
+        // -----------------------------------------------------
+        // FINISHED
+        // -----------------------------------------------------
 
         respawnCoroutine = null;
     }
