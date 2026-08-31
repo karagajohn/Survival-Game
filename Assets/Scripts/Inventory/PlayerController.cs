@@ -31,6 +31,13 @@ public class PlayerController : MonoBehaviour
     public float minimumLookAngle = -80f;
     public float maximumLookAngle = 80f;
 
+    [Header("Footsteps")]
+    [SerializeField]
+    private float walkFootstepInterval = 0.5f;
+
+    [SerializeField]
+    private float sprintFootstepInterval = 0.32f;
+
     private CharacterController controller;
     private PlayerStats stats;
 
@@ -40,6 +47,8 @@ public class PlayerController : MonoBehaviour
     private Vector2 mouseDeltaVelocity;
 
     private float cameraPitch;
+
+    private float footstepTimer;
 
     private void Start()
     {
@@ -69,6 +78,7 @@ public class PlayerController : MonoBehaviour
         if (stats != null && stats.IsDead)
         {
             UpdateDeathAnimation();
+            ResetFootstepTimer();
             return;
         }
 
@@ -235,6 +245,12 @@ public class PlayerController : MonoBehaviour
             movementSpeed
         );
 
+        HandleFootsteps(
+            movementInput,
+            movementSpeed,
+            isGrounded
+        );
+
         HandleJump(isGrounded);
 
         verticalVelocity.y +=
@@ -281,6 +297,60 @@ public class PlayerController : MonoBehaviour
     }
 
     // =========================================================
+    // FOOTSTEPS
+    // =========================================================
+
+    private void HandleFootsteps(
+        Vector2 movementInput,
+        float movementSpeed,
+        bool isGrounded
+    )
+    {
+        bool isMoving =
+            movementInput.sqrMagnitude >
+            0.01f;
+
+        if (!isGrounded || !isMoving)
+        {
+            ResetFootstepTimer();
+            return;
+        }
+
+        bool isSprinting =
+            movementSpeed >=
+            sprintSpeed - 0.01f;
+
+        float interval =
+            isSprinting
+                ? sprintFootstepInterval
+                : walkFootstepInterval;
+
+        footstepTimer -= Time.deltaTime;
+
+        if (footstepTimer <= 0f)
+        {
+            PlayFootstep();
+
+            footstepTimer = interval;
+        }
+    }
+
+    private void PlayFootstep()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return;
+        }
+
+        AudioManager.Instance.PlayFootstep();
+    }
+
+    private void ResetFootstepTimer()
+    {
+        footstepTimer = 0f;
+    }
+
+    // =========================================================
     // ANIMATION - NORMAL MOVEMENT
     // =========================================================
 
@@ -294,7 +364,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // Player is alive again.
         animator.SetBool(
             "IsDead",
             false
@@ -337,7 +406,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // Stop movement animation values.
         animator.SetFloat(
             "Speed",
             0f
@@ -353,8 +421,6 @@ public class PlayerController : MonoBehaviour
             true
         );
 
-        // This is the ONLY thing that tells
-        // the Animator Controller to enter Death.
         animator.SetBool(
             "IsDead",
             true
@@ -452,6 +518,8 @@ public class PlayerController : MonoBehaviour
         mouseDeltaVelocity =
             Vector2.zero;
 
+        ResetFootstepTimer();
+
         ResetAnimator();
     }
 
@@ -466,6 +534,8 @@ public class PlayerController : MonoBehaviour
 
         mouseDeltaVelocity =
             Vector2.zero;
+
+        ResetFootstepTimer();
 
         if (!enabled)
         {

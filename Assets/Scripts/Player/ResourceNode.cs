@@ -10,9 +10,12 @@ public enum ResourceNodeType
 
 public class ResourceNode : MonoBehaviour
 {
-    public ResourceNodeType nodeType = ResourceNodeType.Tree;
+    public ResourceNodeType nodeType =
+        ResourceNodeType.Tree;
 
-    public ResourceKind resourceKind = ResourceKind.Wood;
+    public ResourceKind resourceKind =
+        ResourceKind.Wood;
+
     public int maxHealth = 3;
     public int dropAmount = 3;
 
@@ -41,11 +44,39 @@ public class ResourceNode : MonoBehaviour
     {
         currentHealth -= damage;
 
-        Debug.Log($"{gameObject.name} hit. HP: {currentHealth}");
+        Debug.Log(
+            $"{gameObject.name} hit. HP: {currentHealth}"
+        );
+
+        PlayHitSound();
 
         if (currentHealth <= 0)
         {
             Harvest();
+        }
+    }
+
+    private void PlayHitSound()
+    {
+        if (AudioManager.Instance == null)
+        {
+            return;
+        }
+
+        switch (nodeType)
+        {
+            case ResourceNodeType.Tree:
+
+                AudioManager.Instance.PlayWoodHit();
+
+                break;
+
+            case ResourceNodeType.Rock:
+            case ResourceNodeType.Ore:
+
+                AudioManager.Instance.PlayStoneHit();
+
+                break;
         }
     }
 

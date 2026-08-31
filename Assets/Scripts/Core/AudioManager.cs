@@ -19,32 +19,32 @@ public class AudioManager : MonoBehaviour
     private AudioClip[] footstepClips;
 
     [SerializeField]
-    [Range(0f, 1f)]
-    private float footstepsVolume = 1f;
+    [Range(0f, 3f)]
+    private float footstepsVolume = 1.5f;
 
     [Header("Enemy Hit")]
     [SerializeField]
     private AudioClip[] enemyHitClips;
 
     [SerializeField]
-    [Range(0f, 1f)]
-    private float enemyHitVolume = 1f;
+    [Range(0f, 3f)]
+    private float enemyHitVolume = 1.5f;
 
     [Header("Wood Hit")]
     [SerializeField]
     private AudioClip[] woodHitClips;
 
     [SerializeField]
-    [Range(0f, 1f)]
-    private float woodHitVolume = 1f;
+    [Range(0f, 3f)]
+    private float woodHitVolume = 1.8f;
 
     [Header("Stone Hit")]
     [SerializeField]
     private AudioClip[] stoneHitClips;
 
     [SerializeField]
-    [Range(0f, 1f)]
-    private float stoneHitVolume = 1f;
+    [Range(0f, 3f)]
+    private float stoneHitVolume = 1.8f;
 
     [Header("Ambient")]
     [SerializeField]
@@ -52,7 +52,7 @@ public class AudioManager : MonoBehaviour
 
     [SerializeField]
     [Range(0f, 1f)]
-    private float ambientVolume = 0.35f;
+    private float ambientVolume = 0.25f;
 
     private void Awake()
     {
